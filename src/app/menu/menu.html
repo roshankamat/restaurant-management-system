@@ -1,0 +1,57 @@
+<div class="menu-page">
+
+  <div class="menu-header">
+
+    <div>
+      <h1>Menu Management</h1>
+      <p>Manage your restaurant menu items</p>
+    </div>
+
+    <button class="add-button">
+      + Add Item
+    </button>
+
+  </div>
+
+
+  <div class="menu-grid">
+
+    @for (item of menuItems; track item.name) {
+
+      <div class="menu-card">
+
+        <div class="food-icon">
+          🍽️
+        </div>
+
+        <div class="menu-info">
+
+          <h2>{{ item.name }}</h2>
+
+          <p class="category">
+            {{ item.category }}
+          </p>
+
+          <p class="price">
+            ₹{{ item.price }}
+          </p>
+
+          @if (item.available) {
+            <span class="available">
+              Available
+            </span>
+          } @else {
+            <span class="unavailable">
+              Not Available
+            </span>
+          }
+
+        </div>
+
+      </div>
+
+    }
+
+  </div>
+
+</div>
