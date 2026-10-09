@@ -7,11 +7,137 @@
       <p>Manage your restaurant menu items</p>
     </div>
 
-    <button class="add-button">
+    <button class="add-button" (click)="openForm()">
       + Add Item
     </button>
 
   </div>
+
+
+  @if (showForm) {
+
+    <div class="form-container">
+
+      <h2>Add New Menu Item</h2>
+
+      <div class="form-group">
+
+        <label>Item Name</label>
+
+        <input
+          type="text"
+          [(ngModel)]="newItem.name"
+          placeholder="Enter item name"
+        >
+
+      </div>
+
+
+      <div class="form-group">
+
+        <label>Price</label>
+
+        <input
+          type="number"
+          [(ngModel)]="newItem.price"
+          placeholder="Enter price"
+        >
+
+      </div>
+
+
+      <div class="form-group">
+
+        <label>Category</label>
+
+        <input
+          type="text"
+          [(ngModel)]="newItem.category"
+          placeholder="Enter category"
+        >
+
+      </div>
+
+
+      <div class="form-actions">
+
+        <button
+          class="save-button"
+          (click)="addItem()">
+          Add Item
+        </button>
+
+        <button
+          class="cancel-button"
+          (click)="closeForm()">
+          Cancel
+        </button>
+
+      </div>
+
+    </div>
+
+  }
+
+  @if (editingIndex !== -1) {
+
+  <div class="form-container">
+
+    <h2>Edit Menu Item</h2>
+
+    <div class="form-group">
+
+      <label>Item Name</label>
+
+      <input
+        type="text"
+        [(ngModel)]="editItem.name"
+      >
+
+    </div>
+
+    <div class="form-group">
+
+      <label>Price</label>
+
+      <input
+        type="number"
+        [(ngModel)]="editItem.price"
+      >
+
+    </div>
+
+    <div class="form-group">
+
+      <label>Category</label>
+
+      <input
+        type="text"
+        [(ngModel)]="editItem.category"
+      >
+
+    </div>
+
+    <div class="form-actions">
+
+      <button
+        class="save-button"
+        (click)="saveEdit()">
+        Save Changes
+      </button>
+
+      <button
+        class="cancel-button"
+        (click)="cancelEdit()">
+        Cancel
+      </button>
+
+    </div>
+
+  </div>
+
+}
+  
 
 
   <div class="menu-grid">
@@ -37,14 +163,33 @@
           </p>
 
           @if (item.available) {
+
             <span class="available">
               Available
             </span>
+
           } @else {
+
             <span class="unavailable">
               Not Available
             </span>
+
           }
+          <div class="card-actions">
+
+  <button
+    class="edit-button"
+    (click)="editMenuItem($index)">
+    Edit
+  </button>
+
+  <button
+    class="delete-button"
+    (click)="deleteMenuItem($index)">
+    Delete
+  </button>
+
+</div>
 
         </div>
 
