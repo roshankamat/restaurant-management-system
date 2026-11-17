@@ -1,0 +1,523 @@
+.billing-page {
+  padding: 28px;
+  max-width: 1440px;
+  margin: 0 auto;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 24px;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.tagline {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--royal-gold);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-bottom: 2px;
+}
+
+.page-title {
+  font-family: var(--font-royal);
+  font-size: 1.85rem;
+  color: var(--royal-garnet);
+  font-weight: 800;
+}
+
+.page-subtitle {
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  margin-top: 4px;
+}
+
+.alert-success {
+  background: #f0fdf4;
+  color: #15803d;
+  padding: 12px 18px;
+  border-radius: 8px;
+  border: 1px solid #bbf7d0;
+  margin-bottom: 20px;
+  font-weight: 600;
+}
+
+.billing-workspace {
+  display: grid;
+  grid-template-columns: 300px 1fr 340px;
+  gap: 22px;
+  align-items: flex-start;
+}
+
+@media (max-width: 1200px) {
+  .billing-workspace {
+    grid-template-columns: 280px 1fr;
+  }
+  .payment-sidebar {
+    grid-column: span 2;
+  }
+}
+
+@media (max-width: 800px) {
+  .billing-workspace {
+    grid-template-columns: 1fr;
+  }
+  .payment-sidebar {
+    grid-column: span 1;
+  }
+}
+
+/* Sidebar: Open Bills */
+.orders-sidebar {
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.sidebar-header {
+  padding: 16px;
+  border-bottom: 1px solid var(--border-subtle);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.sidebar-header h3 {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.badge-count {
+  font-size: 0.75rem;
+  font-weight: 700;
+  background: #fef3c7;
+  color: #b45309;
+  padding: 2px 8px;
+  border-radius: 999px;
+}
+
+.orders-nav-list {
+  max-height: 600px;
+  overflow-y: auto;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.empty-state-side {
+  text-align: center;
+  padding: 40px 15px;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
+.order-nav-item {
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-subtle);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.order-nav-item:hover {
+  border-color: var(--royal-gold);
+  background: var(--bg-card);
+}
+
+.order-nav-item.active {
+  background: var(--bg-card);
+  border-color: var(--royal-gold);
+  box-shadow: 0 0 0 2px var(--royal-gold-glow);
+}
+
+.nav-item-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+.nav-order-num {
+  font-weight: 800;
+  font-size: 0.9rem;
+  color: var(--royal-deep);
+}
+
+.nav-item-guest {
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  margin-bottom: 6px;
+}
+
+.nav-item-footer {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+/* Invoice Preview Center */
+.empty-bill-box {
+  padding: 80px 20px;
+  text-align: center;
+  border-radius: 14px;
+}
+
+.empty-ico {
+  font-size: 3rem;
+  display: block;
+  margin-bottom: 12px;
+}
+
+.invoice-card {
+  background: #fffdf8;
+  color: #1f1714;
+  border-radius: 14px;
+  padding: 28px 32px;
+  box-shadow: var(--shadow-md);
+  border: 1px solid #dfc59c;
+  max-width: 580px;
+  margin: 0 auto;
+  font-family: 'Courier New', Courier, monospace;
+}
+
+.invoice-card .inr-price,
+.invoice-card .inv-name-eng {
+  color: #3b0728;
+}
+
+.invoice-card .inv-name-hindi {
+  color: #7a143d;
+}
+
+.invoice-header {
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+.inv-crest {
+  font-size: 1.8rem;
+  margin-bottom: 4px;
+}
+
+.inv-name-hindi {
+  font-family: var(--font-hindi);
+  font-size: 1.2rem;
+  color: var(--royal-garnet);
+  margin-bottom: 2px;
+}
+
+.inv-name-eng {
+  font-family: var(--font-royal);
+  font-size: 1.35rem;
+  font-weight: 800;
+  letter-spacing: 1px;
+  color: var(--royal-deep);
+  margin-bottom: 4px;
+}
+
+.inv-tagline {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  font-style: italic;
+  margin-bottom: 6px;
+}
+
+.inv-address, .inv-contact, .inv-fssai {
+  font-size: 0.75rem;
+  color: #475569;
+  line-height: 1.3;
+}
+
+.dashed-divider {
+  border-top: 1px dashed #94a3b8;
+  margin: 12px 0;
+}
+
+.inv-meta-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  font-size: 0.8rem;
+}
+
+.inv-items-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+  margin: 8px 0;
+}
+
+.inv-items-table th {
+  padding: 6px 4px;
+  border-bottom: 1px dashed #94a3b8;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+}
+
+.th-item { text-align: left; }
+.th-qty { text-align: center; }
+.th-rate { text-align: right; }
+.th-amt { text-align: right; }
+
+.inv-items-table td {
+  padding: 6px 4px;
+  font-size: 0.82rem;
+}
+
+.text-center { text-align: center; }
+.text-right { text-align: right; }
+
+.inv-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.82rem;
+}
+
+.inv-summary-row {
+  display: flex;
+  justify-content: space-between;
+}
+
+.inv-grand-total {
+  display: flex;
+  justify-content: space-between;
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.inv-footer {
+  text-align: center;
+  margin-top: 14px;
+}
+
+.inv-thankyou {
+  font-weight: 700;
+  font-size: 0.85rem;
+  margin-bottom: 4px;
+}
+
+.inv-note {
+  font-size: 0.72rem;
+  color: #64748b;
+}
+
+/* Payment Sidebar */
+.payment-sidebar {
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.payment-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border-subtle);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.payment-header h3 {
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+.amount-badge {
+  font-size: 1.25rem;
+  font-weight: 800;
+}
+
+.payment-body {
+  padding: 20px;
+}
+
+.form-label {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+}
+
+.payment-methods-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-bottom: 18px;
+}
+
+.pay-method-btn {
+  padding: 10px 6px;
+  border-radius: 8px;
+  border: 1px solid var(--border-royal);
+  background: var(--bg-elevated);
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  transition: all 0.15s ease;
+}
+
+.pay-method-btn.active {
+  background: var(--royal-garnet);
+  color: #ffffff;
+  border-color: var(--royal-garnet);
+}
+
+.pay-icon {
+  font-size: 1.2rem;
+}
+
+/* UPI QR Code Styling */
+.upi-box {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-royal);
+  border-radius: 12px;
+  padding: 16px;
+  text-align: center;
+  margin-bottom: 18px;
+}
+
+.qr-code-placeholder {
+  width: 140px;
+  height: 140px;
+  margin: 0 auto 12px auto;
+  background: #ffffff;
+  border: 2px solid #0f172a;
+  border-radius: 8px;
+  padding: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.qr-matrix {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  border: 1px dashed #94a3b8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.qr-corner {
+  position: absolute;
+  width: 22px;
+  height: 22px;
+  border: 4px solid #0f172a;
+}
+
+.top-left { top: 0; left: 0; }
+.top-right { top: 0; right: 0; }
+.bottom-left { bottom: 0; left: 0; }
+
+.qr-center-logo {
+  font-size: 1.6rem;
+  font-weight: 900;
+  color: var(--royal-gold);
+}
+
+.upi-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.upi-info strong {
+  font-size: 0.85rem;
+  color: var(--text-primary);
+}
+
+.upi-id {
+  font-size: 0.78rem;
+  color: #64748b;
+  font-family: monospace;
+}
+
+.upi-amt {
+  font-size: 1.15rem;
+  font-weight: 800;
+  margin-top: 4px;
+}
+
+/* Cash box */
+.cash-box {
+  background: var(--bg-elevated);
+  padding: 14px;
+  border-radius: 10px;
+  margin-bottom: 18px;
+  border: 1px solid var(--border-subtle);
+}
+
+.cash-calc-result {
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 0.85rem;
+}
+
+.calc-line {
+  display: flex;
+  justify-content: space-between;
+}
+
+.return-line {
+  font-size: 1.05rem;
+  font-weight: 700;
+  border-top: 1px dashed var(--border-subtle);
+  padding-top: 6px;
+  margin-top: 4px;
+}
+
+/* Card box */
+.card-box {
+  background: var(--bg-elevated);
+  padding: 14px;
+  border-radius: 10px;
+  margin-bottom: 18px;
+  border: 1px solid var(--border-subtle);
+}
+
+.settlement-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.settle-btn {
+  padding: 12px;
+  font-size: 0.95rem;
+}
+
+.paid-settled-box {
+  padding: 40px 20px;
+  text-align: center;
+}
+
+.paid-icon {
+  font-size: 3rem;
+  display: block;
+  margin-bottom: 10px;
+}
+
+.paid-settled-box h4 {
+  font-size: 1.1rem;
+  color: #15803d;
+  margin-bottom: 6px;
+}
+
+.mt-3 {
+  margin-top: 16px;
+}
+

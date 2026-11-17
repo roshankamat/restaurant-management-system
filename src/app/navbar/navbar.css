@@ -1,35 +1,319 @@
-.navbar {
-  height: 70px;
-  background: #1f2937;
-  color: white;
-
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-
-  padding: 0 40px;
+.navbar-wrapper {
+  background: linear-gradient(135deg, #2d051e 0%, #4b0c34 55%, #2a041c 100%);
+  color: #ffffff;
+  border-bottom: 2px solid #d49424;
+  box-shadow: 0 8px 30px rgba(26, 2, 18, 0.35);
+  position: sticky;
+  top: 0;
+  z-index: 900;
+  backdrop-filter: blur(12px);
 }
 
-.logo {
+.navbar-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 11px 28px;
+  border-bottom: 1px solid rgba(245, 185, 66, 0.14);
+  gap: 16px;
+}
+
+.brand-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+  color: #ffffff;
+}
+
+.brand-crest {
+  font-size: 1.65rem;
+  background: linear-gradient(135deg, rgba(245, 185, 66, 0.25), rgba(131, 24, 67, 0.45));
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  border: 1.5px solid #f5b942;
+  box-shadow: 0 0 18px rgba(245, 185, 66, 0.28);
+}
+
+.brand-texts {
+  display: flex;
+  flex-direction: column;
+}
+
+.brand-hindi {
+  font-family: var(--font-hindi);
+  font-size: 0.92rem;
+  color: #fcd34d;
+  letter-spacing: 0.5px;
+  line-height: 1.1;
+}
+
+.brand-title {
+  font-family: var(--font-royal);
+  font-size: 1.32rem;
+  font-weight: 800;
+  letter-spacing: 1.6px;
+  background: linear-gradient(180deg, #ffffff 0%, #fde68a 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.brand-badge {
+  font-size: 0.66rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: rgba(245, 185, 66, 0.16);
+  border: 1px solid rgba(245, 185, 66, 0.35);
+  color: #fde68a;
+  font-weight: 700;
+}
+
+.top-right-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.top-status-bar {
   display: flex;
   align-items: center;
   gap: 10px;
+}
 
-  font-size: 20px;
-  font-weight: bold;
+.status-pill {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 0.78rem;
+  padding: 5px 11px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+.pill-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #34d399;
+}
+
+.kitchen-pill .pill-dot {
+  background: #fbbf24;
+}
+
+.pulse {
+  animation: pulse-dot 1.6s infinite;
+}
+
+@keyframes pulse-dot {
+  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(251, 191, 36, 0.7); }
+  70% { transform: scale(1.1); box-shadow: 0 0 0 6px rgba(251, 191, 36, 0); }
+  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(251, 191, 36, 0); }
+}
+
+.clock-badge {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  background: rgba(0, 0, 0, 0.28);
+  padding: 4px 11px;
+  border-radius: 8px;
+  border: 1px solid rgba(245, 185, 66, 0.32);
+}
+
+.clock-date {
+  font-size: 0.66rem;
+  color: #e2d1dc;
+}
+
+.clock-time {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #fcd34d;
+  font-variant-numeric: tabular-nums;
+}
+
+.theme-toggle-btn {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  border: 1px solid rgba(245, 185, 66, 0.35);
+  background: rgba(255, 255, 255, 0.08);
+  color: #fde68a;
+  font-size: 1.05rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.theme-toggle-btn:hover {
+  background: rgba(245, 185, 66, 0.22);
+  transform: rotate(10deg);
+}
+
+/* Admin Profile Capsule */
+.admin-capsule {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 6px 4px 6px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(245, 185, 66, 0.38);
+}
+
+.admin-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #f5b942, #b45309);
+  color: #2d051e;
+  font-weight: 800;
+  font-size: 0.82rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(245, 185, 66, 0.35);
+}
+
+.admin-meta {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.15;
+  padding-right: 4px;
+}
+
+.admin-name {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.admin-role {
+  font-size: 0.66rem;
+  font-weight: 700;
+  color: #fcd34d;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.logout-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(248, 113, 113, 0.45);
+  background: rgba(220, 38, 38, 0.22);
+  color: #fecaca;
+  font-size: 0.76rem;
+  font-weight: 700;
+  font-family: var(--font-primary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.logout-btn:hover {
+  background: #dc2626;
+  color: #ffffff;
+  border-color: #ef4444;
+}
+
+/* Navigation Pill Bar */
+.navbar-menu {
+  padding: 8px 28px;
+  background: rgba(15, 2, 11, 0.34);
+  overflow-x: auto;
 }
 
 .nav-links {
   display: flex;
-  gap: 25px;
+  gap: 8px;
+  align-items: center;
 }
 
-.nav-links a {
-  color: white;
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  font-size: 0.86rem;
+  font-weight: 600;
+  color: #e7d8e2;
   text-decoration: none;
-  font-size: 15px;
+  border-radius: 10px;
+  border: 1px solid transparent;
+  transition: all 0.2s ease;
+  white-space: nowrap;
 }
 
-.nav-links a:hover {
-  color: #f59e0b;
+.nav-item:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+.nav-item.active {
+  color: #2d051e;
+  background: linear-gradient(135deg, #fde68a 0%, #f5b942 100%);
+  border-color: #fef3c7;
+  font-weight: 800;
+  box-shadow: 0 4px 14px rgba(245, 185, 66, 0.35);
+}
+
+.nav-item.active .counter-badge {
+  background: rgba(45, 5, 30, 0.18);
+  color: #2d051e;
+}
+
+.counter-badge {
+  font-size: 0.7rem;
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+  font-weight: 700;
+}
+
+.counter-badge.highlight {
+  background: #f59e0b;
+  color: #1f1714;
+}
+
+.pulse-badge {
+  background: #ef4444;
+  color: #ffffff;
+}
+
+.settings-link {
+  margin-left: auto;
+}
+
+@media (max-width: 1120px) {
+  .top-status-bar {
+    display: none;
+  }
+}
+
+@media (max-width: 680px) {
+  .brand-badge,
+  .admin-meta,
+  .logout-text {
+    display: none;
+  }
+
+  .navbar-top,
+  .navbar-menu {
+    padding-left: 14px;
+    padding-right: 14px;
+  }
 }

@@ -1,1 +1,350 @@
-/* You can add global styles to this file, and also import other style files */
+/* Kamat Ka Dhaba — Royal Indian Hospitality Design System */
+:root {
+  --font-primary: 'Plus Jakarta Sans', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  --font-royal: 'Cinzel', 'Playfair Display', Georgia, serif;
+  --font-hindi: 'Rozha One', 'Mangal', 'Nirmala UI', serif;
+
+  /* Royal Heritage Color Palette */
+  --royal-garnet: #7a143d;
+  --royal-maroon: #581139;
+  --royal-deep: #3b0728;
+  --royal-gold: #c98212;
+  --royal-gold-light: #f5b942;
+  --royal-gold-glow: rgba(201, 130, 18, 0.25);
+  --saffron-orange: #d9531e;
+  --peacock-teal: #0f766e;
+
+  /* Light Mode — Warm Sandalwood & Ivory */
+  --bg-main: #f7f1e5;
+  --bg-card: rgba(255, 253, 249, 0.92);
+  --bg-card-solid: #fffdf9;
+  --bg-elevated: #f3eadc;
+  --bg-input: #ffffff;
+  --border-subtle: #eadcc8;
+  --border-royal: #dfc59c;
+
+  /* Text Colors */
+  --text-primary: #1f1714;
+  --text-secondary: #53433b;
+  --text-muted: #867467;
+  --text-gold: #a6670a;
+
+  /* Veg & Non-Veg Standard Colors */
+  --veg-green: #15803d;
+  --veg-bg: #f0fdf4;
+  --veg-border: #86efac;
+  --nonveg-red: #b91c1c;
+  --nonveg-bg: #fef2f2;
+  --nonveg-border: #fca5a5;
+
+  /* Table Status Colors */
+  --status-available: #0f9d68;
+  --status-occupied: #d97706;
+  --status-reserved: #2563eb;
+  --status-billing: #7c3aed;
+
+  /* Shadows */
+  --shadow-sm: 0 2px 8px rgba(59, 7, 40, 0.05);
+  --shadow-md: 0 8px 24px rgba(59, 7, 40, 0.09);
+  --shadow-lg: 0 18px 42px rgba(59, 7, 40, 0.14);
+  --shadow-royal: 0 10px 28px rgba(122, 20, 61, 0.22);
+}
+
+/* Dark Mode — Darbar Velvet Night */
+[data-theme='dark'] {
+  --royal-garnet: #f5b942;
+  --royal-maroon: #e09f3e;
+  --royal-deep: #fde68a;
+  --royal-gold: #f5b942;
+  --royal-gold-light: #fcd34d;
+  --royal-gold-glow: rgba(245, 185, 66, 0.24);
+
+  --bg-main: #140812;
+  --bg-card: rgba(32, 14, 28, 0.88);
+  --bg-card-solid: #210e1d;
+  --bg-elevated: #2c1327;
+  --bg-input: #1a0a17;
+  --border-subtle: rgba(245, 185, 66, 0.14);
+  --border-royal: rgba(245, 185, 66, 0.3);
+
+  --text-primary: #fbf4e9;
+  --text-secondary: #dfd0c3;
+  --text-muted: #aa968c;
+  --text-gold: #fcd34d;
+
+  --shadow-sm: 0 2px 10px rgba(0, 0, 0, 0.35);
+  --shadow-md: 0 10px 28px rgba(0, 0, 0, 0.45);
+  --shadow-lg: 0 20px 48px rgba(0, 0, 0, 0.6);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* Custom Burnished Gold Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-elevated);
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #c98212, #831843);
+  border-radius: 999px;
+}
+
+body {
+  font-family: var(--font-primary);
+  background-color: var(--bg-main);
+  background-image:
+    radial-gradient(circle at 12% 8%, rgba(217, 119, 6, 0.08) 0%, transparent 38%),
+    radial-gradient(circle at 88% 15%, rgba(122, 20, 61, 0.07) 0%, transparent 42%),
+    radial-gradient(circle at 50% 95%, rgba(201, 130, 18, 0.06) 0%, transparent 40%);
+  background-attachment: fixed;
+  color: var(--text-primary);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+  transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+@keyframes royalFadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.authenticated-shell {
+  animation: royalFadeUp 0.4s ease-out;
+  padding-bottom: 40px;
+}
+
+/* Indian Veg / Non-Veg Icon Badges */
+.diet-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+  background: #ffffff;
+  vertical-align: middle;
+  flex-shrink: 0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.14);
+}
+
+.diet-badge.veg {
+  border: 2px solid var(--veg-green);
+}
+
+.diet-badge.veg::after {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: var(--veg-green);
+}
+
+.diet-badge.non-veg {
+  border: 2px solid var(--nonveg-red);
+}
+
+.diet-badge.non-veg::after {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: var(--nonveg-red);
+}
+
+/* Spice Level Pills */
+.spice-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 0.74rem;
+  font-weight: 700;
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: rgba(234, 88, 12, 0.11);
+  color: #ea580c;
+  border: 1px solid rgba(234, 88, 12, 0.25);
+}
+
+/* Currency INR Symbol Utility */
+.inr-price {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
+  font-weight: 800;
+  color: var(--royal-deep);
+}
+
+/* Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 9px 18px;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 0.88rem;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+  font-family: var(--font-primary);
+  text-decoration: none;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #831843, #4a044e);
+  color: #ffffff;
+  border-color: rgba(245, 185, 66, 0.35);
+  box-shadow: 0 4px 12px rgba(131, 24, 67, 0.28);
+}
+
+.btn-primary:hover {
+  background: linear-gradient(135deg, #9d174d, #581139);
+  box-shadow: 0 6px 18px rgba(131, 24, 67, 0.38);
+  transform: translateY(-1.5px);
+}
+
+.btn-gold {
+  background: linear-gradient(135deg, #e09619 0%, #b45309 100%);
+  color: #ffffff;
+  border-color: rgba(254, 243, 199, 0.4);
+  box-shadow: 0 4px 14px rgba(180, 83, 9, 0.3);
+}
+
+.btn-gold:hover {
+  background: linear-gradient(135deg, #f5b942 0%, #c98212 100%);
+  box-shadow: 0 6px 20px rgba(217, 119, 6, 0.42);
+  transform: translateY(-1.5px);
+}
+
+.btn-outline {
+  background: var(--bg-card);
+  border: 1px solid var(--border-royal);
+  color: var(--text-primary);
+}
+
+.btn-outline:hover {
+  background: var(--bg-elevated);
+  border-color: var(--royal-gold);
+  transform: translateY(-1px);
+}
+
+.btn-sm {
+  padding: 6px 12px;
+  font-size: 0.8rem;
+  border-radius: 8px;
+}
+
+.btn-danger {
+  background: linear-gradient(135deg, #dc2626, #991b1b);
+  color: #ffffff;
+}
+
+.btn-danger:hover {
+  background: linear-gradient(135deg, #ef4444, #b91c1c);
+  transform: translateY(-1px);
+}
+
+/* Form Controls */
+.form-control, .form-select {
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1.5px solid var(--border-royal);
+  background: var(--bg-input);
+  font-family: var(--font-primary);
+  font-size: 0.92rem;
+  color: var(--text-primary);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.form-control:focus, .form-select:focus {
+  outline: none;
+  border-color: var(--royal-gold);
+  box-shadow: 0 0 0 3px var(--royal-gold-glow);
+}
+
+/* Elevated Glassmorphic Royal Card Component */
+.card-base {
+  background: var(--bg-card);
+  backdrop-filter: blur(10px);
+  border-radius: 16px;
+  border: 1px solid var(--border-subtle);
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+}
+
+.card-base:hover {
+  border-color: var(--border-royal);
+}
+
+/* Modal Backdrop */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(18, 4, 15, 0.72);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+  animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.modal-dialog {
+  background: var(--bg-card-solid);
+  color: var(--text-primary);
+  border-radius: 18px;
+  width: 100%;
+  max-width: 620px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 24px 54px rgba(0, 0, 0, 0.4);
+  border: 1px solid var(--border-royal);
+}
+
+/* Thermal Bill Print Format */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  .printable-bill-area, .printable-bill-area * {
+    visibility: visible;
+    color: #000000 !important;
+    background: #ffffff !important;
+  }
+  .printable-bill-area {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 80mm;
+    margin: 0 auto;
+    font-size: 12px;
+    background: white;
+    padding: 10px;
+  }
+  .no-print {
+    display: none !important;
+  }
+}

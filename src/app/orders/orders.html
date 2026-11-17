@@ -1,1 +1,554 @@
-<p>orders works!</p>
+<div class="orders-page">
+  <!-- Header -->
+  <div class="page-header">
+    <div>
+      <div class="tagline">रसोई और ऑर्डर • Kitchen & POS Orders</div>
+      <h1 class="page-title">Live Orders & Kitchen Display System</h1>
+      <p class="page-subtitle">Real-time ticket tracking from clay tandoor to guest table service</p>
+    </div>
+
+    <div class="header-actions">
+      <!-- Switch View -->
+      <div class="view-switcher">
+        <button
+          class="switch-btn"
+          [class.active]="activeView === 'KDS'"
+          (click)="activeView = 'KDS'"
+        >
+          🍳 Kitchen Display (KDS)
+        </button>
+        <button
+          class="switch-btn"
+          [class.active]="activeView === 'LIST'"
+          (click)="activeView = 'LIST'"
+        >
+          📋 Orders List ({{ db.orders().length }})
+        </button>
+      </div>
+
+      <button class="btn btn-gold" (click)="openNewOrderModal()">
+        <span>➕</span> New Order / POS
+      </button>
+    </div>
+  </div>
+
+  <!-- KDS Kitchen Kanban Board View -->
+  @if (activeView === 'KDS') {
+    <div class="kds-board">
+      <!-- Column 1: Received Tickets -->
+      <div class="kds-column col-received">
+        <div class="column-header">
+          <div class="col-title">
+            <span class="col-dot received-dot"></span>
+            <h3>1. Order Received</h3>
+          </div>
+          <span class="col-count">{{ receivedOrders.length }}</span>
+        </div>
+
+        <div class="tickets-container">
+          @if (receivedOrders.length === 0) {
+            <div class="empty-column-msg">No new orders waiting</div>
+          }
+          @for (order of receivedOrders; track order.id) {
+            <div class="kds-card">
+              <div class="kds-card-top">
+                <span class="kds-order-num">{{ order.orderNumber }}</span>
+                @if (order.type === 'DINE_IN') {
+                  <span class="kds-badge dine-in">Table {{ order.tableNumber }}</span>
+                } @else {
+                  <span class="kds-badge takeaway">{{ order.type }}</span>
+                }
+              </div>
+
+              <div class="kds-guest">{{ order.customerName }}</div>
+
+              @if (order.specialInstructions) {
+                <div class="kds-alert">
+                  ⚠️ {{ order.specialInstructions }}
+                </div>
+              }
+
+              <div class="kds-items">
+                @for (item of order.items; track item.name) {
+                  <div class="kds-item-row">
+                    <span class="kds-qty">{{ item.quantity }}x</span>
+                    <span class="kds-dish-name">
+                      <span class="diet-badge" [ngClass]="item.isVeg ? 'veg' : 'non-veg'"></span>
+                      {{ item.name }}
+                    </span>
+                  </div>
+                }
+              </div>
+
+              <div class="kds-actions">
+                <button class="btn btn-sm btn-gold btn-block" (click)="advanceStatus(order, 'PREPARING')">
+                  🔥 Start Cooking →
+                </button>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Column 2: In Kitchen / Preparing -->
+      <div class="kds-column col-preparing">
+        <div class="column-header">
+          <div class="col-title">
+            <span class="col-dot preparing-dot pulse"></span>
+            <h3>2. In Tandoor / Preparing</h3>
+          </div>
+          <span class="col-count">{{ preparingOrders.length }}</span>
+        </div>
+
+        <div class="tickets-container">
+          @if (preparingOrders.length === 0) {
+            <div class="empty-column-msg">No dishes currently on the stove</div>
+          }
+          @for (order of preparingOrders; track order.id) {
+            <div class="kds-card active-cooking">
+              <div class="kds-card-top">
+                <span class="kds-order-num">{{ order.orderNumber }}</span>
+                @if (order.type === 'DINE_IN') {
+                  <span class="kds-badge dine-in">Table {{ order.tableNumber }}</span>
+                } @else {
+                  <span class="kds-badge takeaway">{{ order.type }}</span>
+                }
+              </div>
+
+              <div class="kds-guest">{{ order.customerName }}</div>
+
+              @if (order.specialInstructions) {
+                <div class="kds-alert">
+                  ⚠️ {{ order.specialInstructions }}
+                </div>
+              }
+
+              <div class="kds-items">
+                @for (item of order.items; track item.name) {
+                  <div class="kds-item-row">
+                    <span class="kds-qty">{{ item.quantity }}x</span>
+                    <span class="kds-dish-name">
+                      <span class="diet-badge" [ngClass]="item.isVeg ? 'veg' : 'non-veg'"></span>
+                      {{ item.name }}
+                    </span>
+                  </div>
+                }
+              </div>
+
+              <div class="kds-actions">
+                <button class="btn btn-sm btn-primary btn-block" (click)="advanceStatus(order, 'READY')">
+                  ✨ Plated & Ready →
+                </button>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Column 3: Plated & Ready for Runner -->
+      <div class="kds-column col-ready">
+        <div class="column-header">
+          <div class="col-title">
+            <span class="col-dot ready-dot"></span>
+            <h3>3. Ready for Service</h3>
+          </div>
+          <span class="col-count">{{ readyOrders.length }}</span>
+        </div>
+
+        <div class="tickets-container">
+          @if (readyOrders.length === 0) {
+            <div class="empty-column-msg">No plated tickets waiting for runner</div>
+          }
+          @for (order of readyOrders; track order.id) {
+            <div class="kds-card">
+              <div class="kds-card-top">
+                <span class="kds-order-num">{{ order.orderNumber }}</span>
+                @if (order.type === 'DINE_IN') {
+                  <span class="kds-badge dine-in">Table {{ order.tableNumber }}</span>
+                } @else {
+                  <span class="kds-badge takeaway">{{ order.type }}</span>
+                }
+              </div>
+
+              <div class="kds-guest">{{ order.customerName }}</div>
+
+              <div class="kds-items">
+                @for (item of order.items; track item.name) {
+                  <div class="kds-item-row">
+                    <span class="kds-qty">{{ item.quantity }}x</span>
+                    <span class="kds-dish-name">
+                      <span class="diet-badge" [ngClass]="item.isVeg ? 'veg' : 'non-veg'"></span>
+                      {{ item.name }}
+                    </span>
+                  </div>
+                }
+              </div>
+
+              <div class="kds-actions">
+                <button class="btn btn-sm btn-outline btn-block" (click)="advanceStatus(order, 'SERVED')">
+                  🍽️ Served to Table →
+                </button>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Column 4: Served / Table Active -->
+      <div class="kds-column col-served">
+        <div class="column-header">
+          <div class="col-title">
+            <span class="col-dot served-dot"></span>
+            <h3>4. Guests Dining</h3>
+          </div>
+          <span class="col-count">{{ servedOrders.length }}</span>
+        </div>
+
+        <div class="tickets-container">
+          @if (servedOrders.length === 0) {
+            <div class="empty-column-msg">No currently served tables waiting for bill</div>
+          }
+          @for (order of servedOrders; track order.id) {
+            <div class="kds-card">
+              <div class="kds-card-top">
+                <span class="kds-order-num">{{ order.orderNumber }}</span>
+                @if (order.type === 'DINE_IN') {
+                  <span class="kds-badge dine-in">Table {{ order.tableNumber }}</span>
+                } @else {
+                  <span class="kds-badge takeaway">{{ order.type }}</span>
+                }
+              </div>
+
+              <div class="kds-guest">{{ order.customerName }}</div>
+
+              <div class="kds-total-box inr-price">
+                Total: ₹{{ order.grandTotal }}
+              </div>
+
+              <div class="kds-actions">
+                <button class="btn btn-sm btn-gold btn-block" (click)="navigateToBilling(order)">
+                  🧾 Generate Bill & Settle
+                </button>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Orders List / Table View -->
+  @if (activeView === 'LIST') {
+    <div class="list-view-container">
+      <!-- Toolbar -->
+      <div class="toolbar-card card-base">
+        <div class="search-box">
+          <input
+            type="text"
+            class="form-control"
+            placeholder="Search by order number (ORD-1001), customer name or phone..."
+            [(ngModel)]="searchQuery"
+          >
+        </div>
+
+        <div class="filters-row">
+          <div class="filter-group">
+            <label>Filter Status:</label>
+            <select class="form-control" [(ngModel)]="filterStatus">
+              <option value="ACTIVE">All Active Kitchen Orders</option>
+              <option value="ALL">All Order History</option>
+              <option value="RECEIVED">Received</option>
+              <option value="PREPARING">Preparing</option>
+              <option value="READY">Ready</option>
+              <option value="SERVED">Served</option>
+              <option value="COMPLETED">Completed & Paid</option>
+              <option value="CANCELLED">Cancelled</option>
+            </select>
+          </div>
+
+          <div class="filter-group">
+            <label>Order Type:</label>
+            <select class="form-control" [(ngModel)]="filterType">
+              <option value="ALL">All Order Types</option>
+              <option value="DINE_IN">Dine-In</option>
+              <option value="TAKEAWAY">Takeaway</option>
+              <option value="DELIVERY">Delivery</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Orders Table -->
+      <div class="card-base table-card-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Order #</th>
+              <th>Type / Table</th>
+              <th>Customer</th>
+              <th>Items Ordered</th>
+              <th>Grand Total</th>
+              <th>Status</th>
+              <th>Payment</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (order of filteredOrders; track order.id) {
+              <tr>
+                <td>
+                  <strong class="order-id-text">{{ order.orderNumber }}</strong>
+                </td>
+                <td>
+                  @if (order.type === 'DINE_IN') {
+                    <span class="kds-badge dine-in">Table {{ order.tableNumber }}</span>
+                  } @else {
+                    <span class="kds-badge takeaway">{{ order.type }}</span>
+                  }
+                </td>
+                <td>
+                  <div>{{ order.customerName }}</div>
+                  <small class="text-muted">{{ order.customerPhone }}</small>
+                </td>
+                <td>
+                  <div class="items-summary">
+                    @for (item of order.items; track item.name) {
+                      <span class="item-chip">
+                        {{ item.quantity }}x {{ item.name }}
+                      </span>
+                    }
+                  </div>
+                </td>
+                <td>
+                  <strong class="inr-price">₹{{ order.grandTotal }}</strong>
+                </td>
+                <td>
+                  <span class="badge-status status-{{ order.status.toLowerCase() }}">
+                    {{ order.status }}
+                  </span>
+                </td>
+                <td>
+                  <span class="pay-badge" [class.paid]="order.paymentStatus === 'PAID'">
+                    {{ order.paymentStatus }}
+                  </span>
+                </td>
+                <td>
+                  <div class="table-actions">
+                    <button class="btn btn-sm btn-outline" (click)="navigateToBilling(order)" title="View Bill & Invoice">
+                      🧾 Bill
+                    </button>
+                    @if (order.status !== 'COMPLETED' && order.status !== 'CANCELLED') {
+                      <button class="btn btn-sm btn-danger" (click)="cancelOrder(order)" title="Cancel Order">
+                        ✕
+                      </button>
+                    }
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  }
+
+  <!-- POS New Order Modal / Drawer -->
+  @if (showNewOrderModal) {
+    <div class="modal-overlay" (click)="closeNewOrderModal()">
+      <div class="modal-dialog pos-modal" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h2>🍽️ New Restaurant Order / POS Terminal</h2>
+          <button class="modal-close-btn" (click)="closeNewOrderModal()">✕</button>
+        </div>
+
+        <div class="pos-layout">
+          <!-- Left: Dish Picker -->
+          <div class="pos-dish-picker">
+            <div class="pos-picker-controls">
+              <!-- Search -->
+              <input
+                type="text"
+                class="form-control"
+                placeholder="Search dishes (e.g. Biryani, Butter Chicken, Naan)..."
+                [(ngModel)]="posSearchQuery"
+              >
+
+              <!-- Category Pills -->
+              <div class="pos-categories">
+                <button
+                  class="pos-cat-pill"
+                  [class.active]="posSelectedCategory === 'All'"
+                  (click)="posSelectedCategory = 'All'"
+                >
+                  All
+                </button>
+                @for (cat of categories; track cat) {
+                  <button
+                    class="pos-cat-pill"
+                    [class.active]="posSelectedCategory === cat"
+                    (click)="posSelectedCategory = cat"
+                  >
+                    {{ cat }}
+                  </button>
+                }
+              </div>
+            </div>
+
+            <!-- Dishes Grid -->
+            <div class="pos-items-grid">
+              @for (item of posMenuItems; track item.id) {
+                <div class="pos-item-card" (click)="addItemToTicket(item)">
+                  <div class="pos-item-top">
+                    <span class="diet-badge" [ngClass]="item.isVeg ? 'veg' : 'non-veg'"></span>
+                    <span class="inr-price">₹{{ item.price }}</span>
+                  </div>
+                  <div class="pos-item-title">{{ item.name }}</div>
+                  @if (item.hindiName) {
+                    <div class="pos-item-hindi">{{ item.hindiName }}</div>
+                  }
+                  <span class="pos-add-hint">+ Add to Ticket</span>
+                </div>
+              }
+            </div>
+          </div>
+
+          <!-- Right: Order Ticket & Settlement -->
+          <div class="pos-order-ticket">
+            <div class="ticket-top-config">
+              <!-- Order Type -->
+              <div class="form-row">
+                <div class="form-group col-6">
+                  <label>Order Type</label>
+                  <select class="form-control" [(ngModel)]="newOrderType">
+                    <option value="DINE_IN">Dine-In (Table)</option>
+                    <option value="TAKEAWAY">Takeaway / Parcel</option>
+                    <option value="DELIVERY">Delivery</option>
+                  </select>
+                </div>
+
+                @if (newOrderType === 'DINE_IN') {
+                  <div class="form-group col-6">
+                    <label>Select Table</label>
+                    <select class="form-control" [(ngModel)]="newOrderTableId">
+                      @for (t of db.tables(); track t.id) {
+                        <option [value]="t.id">Table {{ t.number }} ({{ t.zone }}) - {{ t.status }}</option>
+                      }
+                    </select>
+                  </div>
+                }
+              </div>
+
+              <!-- Customer info -->
+              <div class="form-row">
+                <div class="form-group col-6">
+                  <label>Customer Mobile</label>
+                  <input
+                    type="tel"
+                    class="form-control"
+                    placeholder="+91 98..."
+                    [(ngModel)]="newOrderCustomerPhone"
+                    (change)="selectCustomerLookup(newOrderCustomerPhone)"
+                  >
+                </div>
+                <div class="form-group col-6">
+                  <label>Customer Name</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    placeholder="Guest Name"
+                    [(ngModel)]="newOrderCustomerName"
+                  >
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label>Kitchen Notes (e.g., Jain prep, Extra butter)</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  placeholder="Special instructions for Chef"
+                  [(ngModel)]="newOrderInstructions"
+                >
+              </div>
+            </div>
+
+            <!-- Ticket Items Table -->
+            <div class="ticket-items-scroll">
+              @if (orderTicketItems.length === 0) {
+                <div class="empty-ticket-hint">
+                  <span>👈 Select dishes from the menu to build the order</span>
+                </div>
+              } @else {
+                <div class="ticket-list">
+                  @for (item of orderTicketItems; track item.name; let idx = $index) {
+                    <div class="ticket-row">
+                      <div class="ticket-row-info">
+                        <span class="diet-badge" [ngClass]="item.isVeg ? 'veg' : 'non-veg'"></span>
+                        <span class="ticket-row-name">{{ item.name }}</span>
+                      </div>
+
+                      <div class="ticket-row-controls">
+                        <button class="qty-btn" (click)="decrementQty(item, idx)">-</button>
+                        <span class="qty-val">{{ item.quantity }}</span>
+                        <button class="qty-btn" (click)="incrementQty(item)">+</button>
+                        <span class="row-total inr-price">₹{{ item.price * item.quantity }}</span>
+                      </div>
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+
+            <!-- Bill Summary & Calculation -->
+            <div class="ticket-calc-box">
+              <div class="discount-input-row">
+                <input
+                  type="text"
+                  class="form-control form-control-sm"
+                  placeholder="Promo Code (ROYAL10, DIWALI20)"
+                  [(ngModel)]="discountCode"
+                >
+                <button class="btn btn-sm btn-outline" (click)="applyDiscount()">Apply</button>
+              </div>
+
+              <div class="calc-row">
+                <span>Subtotal:</span>
+                <span>₹{{ ticketSubtotal }}</span>
+              </div>
+
+              @if (discountAmount > 0) {
+                <div class="calc-row text-success">
+                  <span>Discount ({{ discountCode }}):</span>
+                  <span>-₹{{ discountAmount }}</span>
+                </div>
+              }
+
+              <div class="calc-row text-muted">
+                <span>CGST ({{ db.profile().cgstPercent }}%):</span>
+                <span>₹{{ ticketCgst }}</span>
+              </div>
+
+              <div class="calc-row text-muted">
+                <span>SGST ({{ db.profile().sgstPercent }}%):</span>
+                <span>₹{{ ticketSgst }}</span>
+              </div>
+
+              <div class="calc-row grand-total-row">
+                <span>Grand Total:</span>
+                <span class="inr-price">₹{{ ticketGrandTotal }}</span>
+              </div>
+
+              <button
+                class="btn btn-gold btn-block fire-kitchen-btn"
+                [disabled]="orderTicketItems.length === 0"
+                (click)="submitNewOrder()"
+              >
+                🔥 Fire Order to Kitchen (₹{{ ticketGrandTotal }})
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+</div>

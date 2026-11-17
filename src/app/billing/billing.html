@@ -1,1 +1,319 @@
-<p>billing works!</p>
+<div class="billing-page">
+  <!-- Header -->
+  <div class="page-header no-print">
+    <div>
+      <div class="tagline">बिलिंग और कर चालान • Billing & Tax Invoices</div>
+      <h1 class="page-title">POS Invoicing & Settlement Counter</h1>
+      <p class="page-subtitle">GST compliant dining receipts, UPI payments, and instant settlement</p>
+    </div>
+
+    @if (selectedOrder) {
+      <div class="header-actions">
+        <button class="btn btn-outline" (click)="printThermalReceipt()">
+          🖨️ Print Tax Invoice (80mm)
+        </button>
+      </div>
+    }
+  </div>
+
+  @if (settledSuccessMessage) {
+    <div class="alert alert-success no-print">
+      ✅ {{ settledSuccessMessage }}
+    </div>
+  }
+
+  <div class="billing-workspace no-print">
+    <!-- Left Column: Unpaid & Active Bills Selector -->
+    <div class="card-base orders-sidebar">
+      <div class="sidebar-header">
+        <h3>🧾 Open Dining Bills</h3>
+        <span class="badge-count">{{ unpaidOrders.length }} Pending</span>
+      </div>
+
+      <div class="orders-nav-list">
+        @if (unpaidOrders.length === 0) {
+          <div class="empty-state-side">
+            <span class="empty-ico">🎉</span>
+            <p>All active orders have been billed and settled!</p>
+          </div>
+        }
+        @for (order of unpaidOrders; track order.id) {
+          <div
+            class="order-nav-item"
+            [class.active]="selectedOrderId === order.id"
+            (click)="selectOrder(order)"
+          >
+            <div class="nav-item-top">
+              <span class="nav-order-num">{{ order.orderNumber }}</span>
+              @if (order.type === 'DINE_IN') {
+                <span class="kds-badge dine-in">Table {{ order.tableNumber }}</span>
+              } @else {
+                <span class="kds-badge takeaway">{{ order.type }}</span>
+              }
+            </div>
+
+            <div class="nav-item-guest">
+              {{ order.customerName }}
+            </div>
+
+            <div class="nav-item-footer">
+              <span class="nav-items-count">{{ order.items.length }} items</span>
+              <strong class="inr-price">₹{{ order.grandTotal }}</strong>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Center Column: Indian Tax Invoice Preview (Printable Area) -->
+    <div class="bill-preview-col">
+      @if (!selectedOrder) {
+        <div class="card-base empty-bill-box">
+          <span class="empty-ico">🧾</span>
+          <h3>No Bill Selected</h3>
+          <p>Please select an open order from the sidebar to view invoice details.</p>
+        </div>
+      } @else {
+        <div class="card-base invoice-card printable-bill-area">
+          <!-- Restaurant Invoice Header -->
+          <div class="invoice-header">
+            <div class="inv-crest">👑</div>
+            <h2 class="inv-name-hindi">{{ db.profile().hindiName }}</h2>
+            <h1 class="inv-name-eng">{{ db.profile().name }}</h1>
+            <p class="inv-tagline">{{ db.profile().tagline }}</p>
+            <p class="inv-address">{{ db.profile().address }}, {{ db.profile().city }} - {{ db.profile().pincode }}</p>
+            <p class="inv-contact">Tel: {{ db.profile().phone }} | GSTIN: {{ db.profile().gstin }}</p>
+            <p class="inv-fssai">FSSAI Lic. No: {{ db.profile().fssaiNumber }}</p>
+          </div>
+
+          <div class="dashed-divider"></div>
+
+          <!-- Bill Meta Information -->
+          <div class="inv-meta-grid">
+            <div>
+              <span>Invoice No:</span> <strong>{{ selectedOrder.orderNumber }}</strong>
+            </div>
+            <div>
+              <span>Date:</span> <span>{{ selectedOrder.createdAt | date:'dd-MMM-yyyy, hh:mm a' }}</span>
+            </div>
+            <div>
+              <span>Order Type:</span> 
+              <strong>
+                {{ selectedOrder.type === 'DINE_IN' ? 'Table ' + selectedOrder.tableNumber : selectedOrder.type }}
+              </strong>
+            </div>
+            <div>
+              <span>Guest:</span> <span>{{ selectedOrder.customerName }}</span>
+            </div>
+            <div>
+              <span>Steward / Cashier:</span> <span>Royal Station 01</span>
+            </div>
+            <div>
+              <span>Payment Status:</span> 
+              <strong [class.text-success]="selectedOrder.paymentStatus === 'PAID'">
+                {{ selectedOrder.paymentStatus }}
+              </strong>
+            </div>
+          </div>
+
+          <div class="dashed-divider"></div>
+
+          <!-- Items Table -->
+          <table class="inv-items-table">
+            <thead>
+              <tr>
+                <th class="th-item">Item Description</th>
+                <th class="th-qty">Qty</th>
+                <th class="th-rate">Rate</th>
+                <th class="th-amt">Amount</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (item of selectedOrder.items; track item.name) {
+                <tr>
+                  <td>
+                    <span class="diet-badge" [ngClass]="item.isVeg ? 'veg' : 'non-veg'"></span>
+                    {{ item.name }}
+                  </td>
+                  <td class="text-center">{{ item.quantity }}</td>
+                  <td class="text-right">₹{{ item.price }}</td>
+                  <td class="text-right inr-price">₹{{ item.price * item.quantity }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+
+          <div class="dashed-divider"></div>
+
+          <!-- Tax & Total Breakdown -->
+          <div class="inv-summary">
+            <div class="inv-summary-row">
+              <span>Item Subtotal:</span>
+              <span>₹{{ selectedOrder.subtotal }}</span>
+            </div>
+
+            @if (selectedOrder.discountAmount > 0) {
+              <div class="inv-summary-row text-success">
+                <span>Discount Promo ({{ selectedOrder.discountCode }}):</span>
+                <span>-₹{{ selectedOrder.discountAmount }}</span>
+              </div>
+            }
+
+            <div class="inv-summary-row">
+              <span>CGST ({{ selectedOrder.cgstRate }}%):</span>
+              <span>₹{{ selectedOrder.cgstAmount }}</span>
+            </div>
+
+            <div class="inv-summary-row">
+              <span>SGST ({{ selectedOrder.sgstRate }}%):</span>
+              <span>₹{{ selectedOrder.sgstAmount }}</span>
+            </div>
+
+            <div class="dashed-divider"></div>
+
+            <div class="inv-grand-total">
+              <span>NET PAYABLE (INR):</span>
+              <span class="inr-price">₹{{ selectedOrder.grandTotal }}</span>
+            </div>
+          </div>
+
+          <div class="dashed-divider"></div>
+
+          <!-- Receipt Footer Note -->
+          <div class="inv-footer">
+            <p class="inv-thankyou">धन्यवाद • Thank you for dining with us!</p>
+            <p class="inv-note">Prices inclusive of all applicable statutory taxes.</p>
+            <p class="inv-note">FSSAI Certified Hygienic Kitchen & Bar</p>
+          </div>
+        </div>
+      }
+    </div>
+
+    <!-- Right Column: Payment Settlement Counter -->
+    @if (selectedOrder) {
+      <div class="card-base payment-sidebar">
+        <div class="payment-header">
+          <h3>💳 Payment Counter</h3>
+          <div class="amount-badge inr-price">₹{{ selectedOrder.grandTotal }}</div>
+        </div>
+
+        @if (selectedOrder.paymentStatus === 'PAID') {
+          <div class="paid-settled-box">
+            <span class="paid-icon">✅</span>
+            <h4>Bill Already Settled</h4>
+            <p>Paid via <strong>{{ selectedOrder.paymentMethod }}</strong></p>
+            <small>Txn ID: {{ selectedOrder.paymentTransactionId }}</small>
+            <button class="btn btn-outline btn-block mt-3" (click)="printThermalReceipt()">
+              🖨️ Re-Print Tax Invoice
+            </button>
+          </div>
+        } @else {
+          <div class="payment-body">
+            <!-- Payment Method Tabs -->
+            <label class="form-label">Select Payment Mode:</label>
+            <div class="payment-methods-grid">
+              <button
+                class="pay-method-btn"
+                [class.active]="paymentMethod === 'UPI'"
+                (click)="paymentMethod = 'UPI'"
+              >
+                <span class="pay-icon">📱</span>
+                <span>UPI (QR)</span>
+              </button>
+              <button
+                class="pay-method-btn"
+                [class.active]="paymentMethod === 'CASH'"
+                (click)="paymentMethod = 'CASH'"
+              >
+                <span class="pay-icon">💵</span>
+                <span>Cash</span>
+              </button>
+              <button
+                class="pay-method-btn"
+                [class.active]="paymentMethod === 'CARD'"
+                (click)="paymentMethod = 'CARD'"
+              >
+                <span class="pay-icon">💳</span>
+                <span>Card POS</span>
+              </button>
+            </div>
+
+            <!-- UPI Payment Details -->
+            @if (paymentMethod === 'UPI') {
+              <div class="upi-box">
+                <div class="qr-code-placeholder">
+                  <div class="qr-matrix">
+                    <div class="qr-corner top-left"></div>
+                    <div class="qr-corner top-right"></div>
+                    <div class="qr-corner bottom-left"></div>
+                    <div class="qr-center-logo">₹</div>
+                  </div>
+                </div>
+                <div class="upi-info">
+                  <strong>Scan with GPay / PhonePe / Paytm</strong>
+                  <span class="upi-id">UPI ID: kamatkadhaba@icici</span>
+                  <span class="upi-amt inr-price">Pay ₹{{ selectedOrder.grandTotal }}</span>
+                </div>
+              </div>
+            }
+
+            <!-- Cash Payment Details -->
+            @if (paymentMethod === 'CASH') {
+              <div class="cash-box">
+                <div class="form-group">
+                  <label>Cash Tendered by Guest (₹):</label>
+                  <input
+                    type="number"
+                    class="form-control"
+                    [(ngModel)]="cashTendered"
+                    placeholder="Enter amount given"
+                  >
+                </div>
+
+                <div class="cash-calc-result">
+                  <div class="calc-line">
+                    <span>Total Bill:</span>
+                    <span>₹{{ selectedOrder.grandTotal }}</span>
+                  </div>
+                  <div class="calc-line">
+                    <span>Cash Given:</span>
+                    <span>₹{{ cashTendered }}</span>
+                  </div>
+                  <div class="calc-line return-line text-success">
+                    <span>Change to Return:</span>
+                    <strong class="inr-price">₹{{ cashChangeReturn }}</strong>
+                  </div>
+                </div>
+              </div>
+            }
+
+            <!-- Card Payment Details -->
+            @if (paymentMethod === 'CARD') {
+              <div class="card-box">
+                <div class="form-group">
+                  <label>Swipe / Tap on POS Terminal</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    placeholder="Approval Code / Txn Reference"
+                    [(ngModel)]="transactionReference"
+                  >
+                </div>
+              </div>
+            }
+
+            <div class="settlement-actions">
+              <button class="btn btn-gold btn-block settle-btn" (click)="settleBill()">
+                ✅ Complete Payment & Free Table
+              </button>
+
+              <button class="btn btn-outline btn-block" (click)="printThermalReceipt()">
+                🖨️ Print Receipt
+              </button>
+            </div>
+          </div>
+        }
+      </div>
+    }
+  </div>
+</div>

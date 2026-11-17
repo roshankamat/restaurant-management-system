@@ -1,0 +1,198 @@
+<div class="login-portal">
+  <!-- Left Architectural Royal Showcase Panel -->
+  <section class="heritage-panel">
+    <div class="jaali-pattern"></div>
+    <div class="ambient-glow glow-top"></div>
+    <div class="ambient-glow glow-bottom"></div>
+
+    <div class="mughal-arch-frame">
+      <div class="shift-pill">
+        <span class="shift-dot"></span>
+        <span>{{ shiftGreeting }}</span>
+      </div>
+
+      <div class="royal-emblem">
+        <div class="emblem-ring">
+          <span class="emblem-crown">👑</span>
+        </div>
+      </div>
+
+      <p class="heritage-hindi">{{ db.profile().hindiName }}</p>
+      <h1 class="heritage-title">{{ db.profile().name }}</h1>
+      <p class="heritage-tagline">{{ db.profile().tagline }}</p>
+
+      <div class="ornate-divider">
+        <span>✦</span>
+        <span class="line"></span>
+        <span>❖</span>
+        <span class="line"></span>
+        <span>✦</span>
+      </div>
+
+      <div class="system-highlights">
+        <div class="highlight-card">
+          <span class="hl-icon">🍛</span>
+          <div>
+            <strong>{{ db.menu().length }} Curated Indian Dishes</strong>
+            <span>Authentic regional recipes & ₹ INR pricing</span>
+          </div>
+        </div>
+
+        <div class="highlight-card">
+          <span class="hl-icon">🪑</span>
+          <div>
+            <strong>{{ db.tables().length }} Royal Dining Tables</strong>
+            <span>Live floor plan across 3 fine-dining zones</span>
+          </div>
+        </div>
+
+        <div class="highlight-card">
+          <span class="hl-icon">🧾</span>
+          <div>
+            <strong>GST Billing & Persistent DB</strong>
+            <span>Instant UPI QR, KDS kitchen sync & JSON backups</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="heritage-footer">
+        <span>{{ db.profile().address }}, {{ db.profile().city }}</span>
+        <span>GSTIN: {{ db.profile().gstin }}</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Right Admin Authentication Panel -->
+  <section class="auth-panel">
+    <div class="auth-card" [class.shake]="shakeError">
+      <div class="auth-card-header">
+        <span class="security-badge">🔐 Dedicated Admin Portal</span>
+        <h2 class="auth-title">Admin Sign In</h2>
+        <p class="auth-subtitle">Authenticate to manage kitchen operations, tables, menu, billing & database.</p>
+      </div>
+
+      <!-- Mode Switcher: Credentials vs Staff PIN -->
+      <div class="mode-tabs">
+        <button
+          type="button"
+          class="mode-tab"
+          [class.active]="loginMode === 'CREDENTIALS'"
+          (click)="loginMode = 'CREDENTIALS'; errorMessage = ''"
+        >
+          🔑 Admin Credentials
+        </button>
+        <button
+          type="button"
+          class="mode-tab"
+          [class.active]="loginMode === 'PIN'"
+          (click)="loginMode = 'PIN'; errorMessage = ''; pinDigits = ''"
+        >
+          🔢 4-Digit Staff PIN
+        </button>
+      </div>
+
+      @if (errorMessage) {
+        <div class="auth-error">
+          <span>⚠️</span>
+          <span>{{ errorMessage }}</span>
+        </div>
+      }
+
+      <!-- Mode 1: Username & Password Form -->
+      @if (loginMode === 'CREDENTIALS') {
+        <form class="credentials-form" (ngSubmit)="onCredentialsSubmit()">
+          <div class="field-group">
+            <label for="admin-username">Admin Username or Email</label>
+            <div class="input-with-icon">
+              <span class="field-icon">👤</span>
+              <input
+                id="admin-username"
+                name="username"
+                type="text"
+                class="royal-input"
+                [(ngModel)]="username"
+                placeholder="e.g. admin or admin@kamatkadhaba.in"
+                autocomplete="username"
+              >
+            </div>
+          </div>
+
+          <div class="field-group">
+            <label for="admin-password">Password</label>
+            <div class="input-with-icon">
+              <span class="field-icon">🔒</span>
+              <input
+                id="admin-password"
+                name="password"
+                [type]="showPassword ? 'text' : 'password'"
+                class="royal-input"
+                [(ngModel)]="password"
+                placeholder="Enter your admin password"
+                autocomplete="current-password"
+              >
+              <button
+                type="button"
+                class="toggle-pw-btn"
+                (click)="showPassword = !showPassword"
+                [attr.aria-label]="showPassword ? 'Hide password' : 'Show password'"
+              >
+                {{ showPassword ? '🙈' : '👁️' }}
+              </button>
+            </div>
+          </div>
+
+          <button type="submit" class="btn-royal-submit" [disabled]="isSubmitting">
+            <span>Enter Management Console</span>
+            <span class="arrow">→</span>
+          </button>
+        </form>
+      }
+
+      <!-- Mode 2: 4-Digit Quick Staff PIN Pad -->
+      @if (loginMode === 'PIN') {
+        <div class="pin-pad-wrapper">
+          <div class="pin-dots">
+            @for (idx of [0, 1, 2, 3]; track idx) {
+              <div class="pin-dot" [class.filled]="pinDigits.length > idx"></div>
+            }
+          </div>
+          <p class="pin-hint">Enter your 4-digit Kamat Ka Dhaba staff PIN</p>
+
+          <div class="keypad-grid">
+            @for (num of ['1','2','3','4','5','6','7','8','9']; track num) {
+              <button type="button" class="key-btn" (click)="pressPinDigit(num)">{{ num }}</button>
+            }
+            <button type="button" class="key-btn key-util" (click)="clearPin()">CLR</button>
+            <button type="button" class="key-btn" (click)="pressPinDigit('0')">0</button>
+            <button type="button" class="key-btn key-util" (click)="backspacePin()">⌫</button>
+          </div>
+        </div>
+      }
+
+      <!-- Quick Access Demo Strip -->
+      <div class="demo-accounts-box">
+        <div class="demo-header">
+          <span>⚡ One-Click Admin Access (Demo Credentials)</span>
+        </div>
+        <div class="demo-grid">
+          <button type="button" class="demo-pill" (click)="quickDemoLogin('admin', 'royal123')">
+            <div class="demo-role">👑 Roshan Kamat (Admin)</div>
+            <div class="demo-creds">admin / royal123 • PIN 1111</div>
+          </button>
+          <button type="button" class="demo-pill" (click)="quickDemoLogin('chef', 'tandoor123')">
+            <div class="demo-role">👨‍🍳 Master Chef</div>
+            <div class="demo-creds">chef / tandoor123 • PIN 2222</div>
+          </button>
+          <button type="button" class="demo-pill" (click)="quickDemoLogin('cashier', 'pos123')">
+            <div class="demo-role">🧾 POS Cashier</div>
+            <div class="demo-creds">cashier / pos123 • PIN 3333</div>
+          </button>
+        </div>
+      </div>
+
+      <div class="auth-card-footer">
+        <span>Kamat Ka Dhaba Hospitality OS • Secured Local Session</span>
+      </div>
+    </div>
+  </section>
+</div>

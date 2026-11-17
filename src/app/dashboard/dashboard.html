@@ -1,33 +1,277 @@
-<div class="dashboard">
+<div class="dashboard-page">
+  <!-- Royal Hero Welcome Banner -->
+  <section class="royal-hero-banner">
+    <div class="hero-jaali"></div>
+    <div class="hero-content">
+      <div>
+        <div class="hero-eyebrow">
+          <span>✦ नमस्ते</span>
+          <span class="sep">•</span>
+          <span>{{ auth.currentUser()?.title || 'Admin Management Console' }}</span>
+        </div>
+        <h1 class="hero-title">
+          Welcome back, {{ auth.currentUser()?.fullName || 'Royal Admin' }}
+        </h1>
+        <p class="hero-subtitle">
+          {{ db.profile().name }} ({{ db.profile().hindiName }}) live command center — kitchen queue, dining floor, GST revenue & guest loyalty.
+        </p>
+      </div>
 
-  <h1>Dashboard</h1>
+      <div class="hero-actions">
+        <a routerLink="/orders" class="btn btn-gold">
+          <span>➕</span> New POS Order
+        </a>
+        <a routerLink="/tables" class="btn btn-hero-glass">
+          <span>🪑</span> Floor Plan ({{ db.occupiedTablesCount() }}/{{ db.tables().length }})
+        </a>
+        <a routerLink="/settings" class="btn btn-hero-glass">
+          <span>🛡️</span> Staff & DB
+        </a>
+      </div>
+    </div>
+  </section>
 
-  <p class="welcome">
-    Welcome back, Admin 👋
-  </p>
-
-  <div class="stats">
-
-    <div class="card">
-      <h3>Total Orders</h3>
-      <p>24</p>
+  <!-- Primary Metric KPI Cards -->
+  <div class="metrics-grid">
+    <div class="card-base metric-card accent-gold">
+      <div class="metric-icon-box">💰</div>
+      <div class="metric-content">
+        <span class="metric-title">Settled Revenue</span>
+        <div class="metric-value">₹{{ db.todayRevenue() | number }}</div>
+        <div class="metric-meta">
+          Pipeline: <strong>₹{{ projectedRevenue | number }}</strong> incl. running tables
+        </div>
+      </div>
     </div>
 
-    <div class="card">
-      <h3>Today's Revenue</h3>
-      <p>₹12,450</p>
+    <div class="card-base metric-card accent-garnet">
+      <div class="metric-icon-box">🧾</div>
+      <div class="metric-content">
+        <span class="metric-title">Total Orders</span>
+        <div class="metric-value">{{ db.totalOrdersCount() }}</div>
+        <div class="metric-meta">
+          <span>{{ orderTypeCounts.dineIn }} Dine-In</span> • <span>{{ orderTypeCounts.takeaway }} Takeaway</span>
+        </div>
+      </div>
     </div>
 
-    <div class="card">
-      <h3>Tables Occupied</h3>
-      <p>8 / 12</p>
+    <div class="card-base metric-card accent-teal">
+      <div class="metric-icon-box">🪑</div>
+      <div class="metric-content">
+        <span class="metric-title">Table Occupancy</span>
+        <div class="metric-value">{{ db.occupiedTablesCount() }} / {{ db.tables().length }}</div>
+        <div class="metric-meta">
+          <span class="text-success">{{ occupancyRate }}% dining floor occupied</span>
+        </div>
+      </div>
     </div>
 
-    <div class="card">
-      <h3>Total Customers</h3>
-      <p>156</p>
+    <div class="card-base metric-card accent-saffron">
+      <div class="metric-icon-box">🔥</div>
+      <div class="metric-content">
+        <span class="metric-title">Kitchen Queue</span>
+        <div class="metric-value">{{ db.activeOrders().length }} Active</div>
+        <div class="metric-meta text-warning">
+          <span>Avg tandoor prep: 18 min</span>
+        </div>
+      </div>
     </div>
 
+    <div class="card-base metric-card accent-plum">
+      <div class="metric-icon-box">👑</div>
+      <div class="metric-content">
+        <span class="metric-title">Average Bill (AOV)</span>
+        <div class="metric-value">₹{{ averageOrderValue | number }}</div>
+        <div class="metric-meta">
+          <span>{{ db.customers().length }} registered VIP patrons</span>
+        </div>
+      </div>
+    </div>
   </div>
 
+  <!-- Main Content Grid -->
+  <div class="main-content-grid">
+    <!-- Left Column: Live Kitchen Orders + Category Sales Analytics -->
+    <div class="left-stack">
+      <div class="card-base column-card">
+        <div class="card-header">
+          <div>
+            <h2>🔥 Live Kitchen Orders (KDS Queue)</h2>
+            <span class="sub-header-text">Pending and cooking tickets requiring chef or runner action</span>
+          </div>
+          <a routerLink="/orders" class="link-action">Open Full KDS →</a>
+        </div>
+
+        <div class="card-body">
+          @if (db.activeOrders().length === 0) {
+            <div class="empty-state">
+              <span class="empty-icon">✨</span>
+              <p>No active orders in the kitchen. All tickets are served and completed!</p>
+            </div>
+          } @else {
+            <div class="order-tickets-list">
+              @for (order of db.activeOrders(); track order.id) {
+                <div class="order-ticket">
+                  <div class="ticket-header">
+                    <div>
+                      <span class="ticket-id">{{ order.orderNumber }}</span>
+                      @if (order.type === 'DINE_IN') {
+                        <span class="ticket-type dine-in">Table {{ order.tableNumber }}</span>
+                      } @else {
+                        <span class="ticket-type takeaway">{{ order.type }}</span>
+                      }
+                    </div>
+                    <span class="badge-status" [ngClass]="getStatusClass(order.status)">
+                      {{ order.status }}
+                    </span>
+                  </div>
+
+                  <div class="ticket-customer">
+                    <strong>{{ order.customerName }}</strong>
+                    @if (order.specialInstructions) {
+                      <span class="special-note">⚠️ {{ order.specialInstructions }}</span>
+                    }
+                  </div>
+
+                  <div class="ticket-items">
+                    @for (item of order.items; track item.name) {
+                      <div class="ticket-item-row">
+                        <span class="item-name">
+                          <span class="diet-badge" [ngClass]="item.isVeg ? 'veg' : 'non-veg'"></span>
+                          {{ item.name }}
+                        </span>
+                        <span class="item-qty">×{{ item.quantity }}</span>
+                      </div>
+                    }
+                  </div>
+
+                  <div class="ticket-footer">
+                    <div class="ticket-total">
+                      Bill: <strong class="inr-price">₹{{ order.grandTotal }}</strong>
+                    </div>
+                    <button class="btn btn-sm btn-gold" (click)="advanceOrderStatus(order)">
+                      @if (order.status === 'RECEIVED') { 🔥 Start Cooking → }
+                      @else if (order.status === 'PREPARING') { ✨ Mark Ready → }
+                      @else if (order.status === 'READY') { 🍽️ Mark Served → }
+                      @else { ✅ Complete → }
+                    </button>
+                  </div>
+                </div>
+              }
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Category Sales Analytics Chart -->
+      <div class="card-base column-card">
+        <div class="card-header">
+          <div>
+            <h2>📈 Cuisine Revenue Breakdown</h2>
+            <span class="sub-header-text">Performance across Indian menu categories (₹ INR)</span>
+          </div>
+          <a routerLink="/billing" class="link-action">Billing Counter →</a>
+        </div>
+
+        <div class="card-body">
+          <div class="category-bars">
+            @for (cat of categorySales; track cat.category) {
+              <div class="cat-bar-item">
+                <div class="cat-bar-meta">
+                  <span class="cat-bar-name">{{ cat.category }}</span>
+                  <strong class="inr-price">₹{{ cat.revenue | number }}</strong>
+                </div>
+                <div class="cat-bar-track">
+                  <div class="cat-bar-fill" [style.width.%]="cat.percent"></div>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Column: Floor Overview, Top Dishes & Admin Activity Log -->
+    <div class="right-stack">
+      <!-- Mini Tables Floor Status -->
+      <div class="card-base column-card">
+        <div class="card-header">
+          <div>
+            <h2>🪑 Dining Floor Snapshot</h2>
+            <span class="sub-header-text">Live status across 12 dining tables</span>
+          </div>
+          <a routerLink="/tables" class="link-action">Manage Floor →</a>
+        </div>
+
+        <div class="card-body">
+          <div class="mini-tables-grid">
+            @for (table of db.tables(); track table.id) {
+              <a routerLink="/tables" class="mini-table-box" [ngClass]="'table-' + table.status.toLowerCase()">
+                <div class="table-box-num">T{{ table.number }}</div>
+                <div class="table-box-cap">{{ table.capacity }} Seats</div>
+                <div class="table-box-status">{{ table.status }}</div>
+              </a>
+            }
+          </div>
+        </div>
+      </div>
+
+      <!-- Top Selling Dishes -->
+      <div class="card-base column-card">
+        <div class="card-header">
+          <div>
+            <h2>👑 Top Selling Royal Dishes</h2>
+            <span class="sub-header-text">Most ordered Indian signatures today</span>
+          </div>
+          <a routerLink="/menu" class="link-action">Edit Menu →</a>
+        </div>
+
+        <div class="card-body">
+          <div class="top-dishes-list">
+            @for (dish of topSellingDishes; track dish.name; let idx = $index) {
+              <div class="top-dish-row">
+                <span class="rank-badge">#{{ idx + 1 }}</span>
+                <span class="diet-badge" [ngClass]="dish.isVeg ? 'veg' : 'non-veg'"></span>
+                <div class="dish-info">
+                  <span class="dish-name">{{ dish.name }}</span>
+                  <span class="dish-cat">{{ dish.category }}</span>
+                </div>
+                <div class="dish-sales">
+                  <span class="dish-count">{{ dish.count }} ordered</span>
+                  <span class="dish-rev inr-price">₹{{ dish.revenue | number }}</span>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent Admin Security & Audit Feed -->
+      <div class="card-base column-card">
+        <div class="card-header">
+          <div>
+            <h2>🛡️ Admin Activity & Audit Log</h2>
+            <span class="sub-header-text">Recent staff sign-ins and kitchen actions</span>
+          </div>
+          <a routerLink="/settings" class="link-action">Staff Access →</a>
+        </div>
+
+        <div class="card-body">
+          <div class="audit-feed">
+            @for (entry of auth.auditLogs().slice(0, 5); track entry.id) {
+              <div class="audit-row">
+                <span class="audit-dot"></span>
+                <div class="audit-body">
+                  <div class="audit-action">{{ entry.action }}</div>
+                  <div class="audit-meta">
+                    <strong>{{ entry.actor }}</strong> • {{ entry.timestamp | date:'hh:mm a' }}
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>

@@ -1,3 +1,7 @@
-<app-navbar></app-navbar>
+@if (auth.isAuthenticated()) {
+  <app-navbar></app-navbar>
+}
 
-<router-outlet></router-outlet>
+<main [class.authenticated-shell]="auth.isAuthenticated()">
+  <router-outlet></router-outlet>
+</main>

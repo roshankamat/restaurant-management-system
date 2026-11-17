@@ -1,1 +1,222 @@
-<p>customers works!</p>
+<div class="customers-page">
+  <!-- Header -->
+  <div class="page-header">
+    <div>
+      <div class="tagline">शाही अतिथि • Royal Guest Loyalty</div>
+      <h1 class="page-title">VIP Patrons & Customer CRM</h1>
+      <p class="page-subtitle">Track patron visit frequency, lifetime spend, food preferences, and table reservations</p>
+    </div>
+
+    <button class="btn btn-gold" (click)="openAddModal()">
+      <span>➕</span> Register New Guest
+    </button>
+  </div>
+
+  <!-- Metric Summary Cards -->
+  <div class="metrics-grid">
+    <div class="card-base metric-box">
+      <div class="metric-icon">👥</div>
+      <div>
+        <span class="metric-label">Registered Guests</span>
+        <div class="metric-value">{{ db.customers().length }}</div>
+      </div>
+    </div>
+
+    <div class="card-base metric-box">
+      <div class="metric-icon">👑</div>
+      <div>
+        <span class="metric-label">Platinum VIPs (>₹30k)</span>
+        <div class="metric-value">{{ platinumCount }}</div>
+      </div>
+    </div>
+
+    <div class="card-base metric-box">
+      <div class="metric-icon">💰</div>
+      <div>
+        <span class="metric-label">Total Guest Lifetime Spend</span>
+        <div class="metric-value inr-price">₹{{ totalCustomerSpend | number }}</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filters Toolbar -->
+  <div class="toolbar-card card-base">
+    <div class="search-wrap">
+      <input
+        type="text"
+        class="form-control"
+        placeholder="Search guest by name, mobile number, or email..."
+        [(ngModel)]="searchQuery"
+      >
+    </div>
+
+    <div class="filters-row">
+      <div class="filter-group">
+        <label>VIP Tier:</label>
+        <select class="form-control" [(ngModel)]="tierFilter">
+          <option value="ALL">All Tiers</option>
+          <option value="PLATINUM">👑 Platinum VIP</option>
+          <option value="GOLD">🌟 Gold Member</option>
+          <option value="SILVER">🥈 Silver Member</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label>Dietary Preference:</label>
+        <select class="form-control" [(ngModel)]="dietFilter">
+          <option value="ALL">All Food Choices</option>
+          <option value="PURE_VEG">🟢 Pure Vegetarian</option>
+          <option value="NON_VEG">🔴 Non-Vegetarian</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- Customer Cards Grid -->
+  <div class="customers-grid">
+    @for (c of filteredCustomers; track c.id) {
+      <div class="card-base customer-card">
+        <div class="customer-card-header">
+          <div class="customer-avatar">
+            {{ c.name.charAt(0) }}
+          </div>
+
+          <div class="customer-info-top">
+            <h3 class="customer-name">{{ c.name }}</h3>
+            <span class="customer-phone">📞 {{ c.phone }}</span>
+          </div>
+
+          <span class="tier-pill" [ngClass]="'tier-' + c.tier.toLowerCase()">
+            @if (c.tier === 'PLATINUM') { 👑 }
+            @else if (c.tier === 'GOLD') { 🌟 }
+            @else { 🥈 }
+            {{ c.tier }}
+          </span>
+        </div>
+
+        <div class="customer-stats-bar">
+          <div class="c-stat">
+            <span class="c-stat-label">Visits</span>
+            <strong class="c-stat-val">{{ c.totalVisits }}</strong>
+          </div>
+          <div class="c-stat">
+            <span class="c-stat-label">Lifetime Spend</span>
+            <strong class="c-stat-val inr-price">₹{{ c.totalSpent | number }}</strong>
+          </div>
+          <div class="c-stat">
+            <span class="c-stat-label">Preference</span>
+            <span class="diet-badge" [ngClass]="c.dietaryPreference === 'PURE_VEG' ? 'veg' : 'non-veg'"></span>
+          </div>
+        </div>
+
+        <div class="customer-card-body">
+          @if (c.favoriteDish) {
+            <div class="fav-dish-line">
+              <span class="label">Favorite:</span>
+              <span class="val">🍛 {{ c.favoriteDish }}</span>
+            </div>
+          }
+
+          @if (c.notes) {
+            <p class="customer-notes">📝 {{ c.notes }}</p>
+          }
+
+          <div class="last-visit-meta">
+            Last visited: {{ c.lastVisit }}
+          </div>
+        </div>
+
+        <div class="customer-card-footer">
+          <button class="btn btn-sm btn-gold btn-full" (click)="startOrderForCustomer(c)">
+            ➕ Start Order
+          </button>
+          <button class="btn btn-sm btn-outline" (click)="openEditModal(c)" title="Edit Guest Details">
+            ✏️
+          </button>
+        </div>
+      </div>
+    }
+  </div>
+
+  <!-- Add / Edit Customer Modal -->
+  @if (showModal) {
+    <div class="modal-overlay" (click)="closeModal()">
+      <div class="modal-dialog" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h2>{{ isEditing ? '✏️ Edit Guest Details' : '➕ Register New Royal Guest' }}</h2>
+          <button class="modal-close-btn" (click)="closeModal()">✕</button>
+        </div>
+
+        <div class="modal-body">
+          <div class="form-group">
+            <label>Full Guest Name *</label>
+            <input
+              type="text"
+              class="form-control"
+              [(ngModel)]="modalCustomer.name"
+              placeholder="e.g. Vikramaditya Roy"
+            >
+          </div>
+
+          <div class="form-row">
+            <div class="form-group col-6">
+              <label>Mobile Number *</label>
+              <input
+                type="tel"
+                class="form-control"
+                [(ngModel)]="modalCustomer.phone"
+                placeholder="+91 98111 22334"
+              >
+            </div>
+            <div class="form-group col-6">
+              <label>Email Address</label>
+              <input
+                type="email"
+                class="form-control"
+                [(ngModel)]="modalCustomer.email"
+                placeholder="guest@example.com"
+              >
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group col-6">
+              <label>Dietary Classification</label>
+              <select class="form-control" [(ngModel)]="modalCustomer.dietaryPreference">
+                <option value="PURE_VEG">🟢 Pure Vegetarian</option>
+                <option value="NON_VEG">🔴 Non-Vegetarian</option>
+              </select>
+            </div>
+
+            <div class="form-group col-6">
+              <label>Favorite Dish</label>
+              <input
+                type="text"
+                class="form-control"
+                [(ngModel)]="modalCustomer.favoriteDish"
+                placeholder="e.g. Kashmiri Rogan Josh"
+              >
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Special Notes & Hospitality Preferences</label>
+            <textarea
+              class="form-control"
+              rows="3"
+              [(ngModel)]="modalCustomer.notes"
+              placeholder="e.g. Prefers Table 10 Shahi Cabana, Less spice, Jain meal requirement on Tuesdays"
+            ></textarea>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button class="btn btn-outline" (click)="closeModal()">Cancel</button>
+          <button class="btn btn-gold" (click)="saveCustomer()">
+            {{ isEditing ? 'Save Changes' : 'Register Guest' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+</div>

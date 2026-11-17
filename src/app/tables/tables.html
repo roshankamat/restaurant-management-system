@@ -1,1 +1,287 @@
-<p>tables works!</p>
+<div class="tables-page">
+  <!-- Header -->
+  <div class="page-header">
+    <div>
+      <div class="tagline">बैठक व्यवस्था • Dine-In Seating</div>
+      <h1 class="page-title">Dining Floor & Table Management</h1>
+      <p class="page-subtitle">Real-time floor layout across Royal AC Hall, Garden Courtyard, and Shahi Cabana</p>
+    </div>
+
+    <!-- Quick Stats Summary -->
+    <div class="floor-stats">
+      <div class="stat-badge available">
+        <span class="badge-dot"></span>
+        <span>Available: <strong>{{ db.tables().length - db.occupiedTablesCount() }}</strong></span>
+      </div>
+      <div class="stat-badge occupied">
+        <span class="badge-dot"></span>
+        <span>Occupied: <strong>{{ db.occupiedTablesCount() }}</strong></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filter Toolbar -->
+  <div class="toolbar-card card-base">
+    <div class="zones-bar">
+      <button
+        class="zone-btn"
+        [class.active]="selectedZone === 'All'"
+        (click)="selectedZone = 'All'"
+      >
+        All Dining Zones ({{ db.tables().length }})
+      </button>
+
+      @for (zone of zones; track zone) {
+        <button
+          class="zone-btn"
+          [class.active]="selectedZone === zone"
+          (click)="selectedZone = zone"
+        >
+          {{ zone }}
+        </button>
+      }
+    </div>
+
+    <div class="status-legend">
+      <button
+        class="legend-item"
+        [class.active]="selectedStatus === 'All'"
+        (click)="selectedStatus = 'All'"
+      >
+        All Statuses
+      </button>
+      <button
+        class="legend-item legend-available"
+        [class.active]="selectedStatus === 'AVAILABLE'"
+        (click)="selectedStatus = 'AVAILABLE'"
+      >
+        <span class="dot available-dot"></span> Available
+      </button>
+      <button
+        class="legend-item legend-occupied"
+        [class.active]="selectedStatus === 'OCCUPIED'"
+        (click)="selectedStatus = 'OCCUPIED'"
+      >
+        <span class="dot occupied-dot"></span> Occupied
+      </button>
+      <button
+        class="legend-item legend-reserved"
+        [class.active]="selectedStatus === 'RESERVED'"
+        (click)="selectedStatus = 'RESERVED'"
+      >
+        <span class="dot reserved-dot"></span> Reserved
+      </button>
+      <button
+        class="legend-item legend-billing"
+        [class.active]="selectedStatus === 'BILLING'"
+        (click)="selectedStatus = 'BILLING'"
+      >
+        <span class="dot billing-dot"></span> Billing
+      </button>
+    </div>
+  </div>
+
+  <!-- Tables Floor Layout Grid -->
+  <div class="tables-grid">
+    @for (table of filteredTables; track table.id) {
+      <div class="table-card card-base" [ngClass]="'status-' + table.status.toLowerCase()">
+        <!-- Table Card Header -->
+        <div class="table-card-top">
+          <div class="table-ident">
+            <span class="table-badge">Table {{ table.number }}</span>
+            <span class="table-zone">{{ table.zone }}</span>
+          </div>
+
+          <span class="table-status-pill" [ngClass]="'pill-' + table.status.toLowerCase()">
+            {{ table.status }}
+          </span>
+        </div>
+
+        <!-- Architectural Top-Down Dining Table Visual -->
+        <div class="table-seating-visual">
+          <div class="architectural-table" [ngClass]="'seats-' + table.capacity">
+            <div class="chairs-row chairs-top">
+              @if (table.capacity === 2) {
+                <span class="chair-pill"></span>
+              } @else if (table.capacity === 4) {
+                <span class="chair-pill"></span>
+                <span class="chair-pill"></span>
+              } @else if (table.capacity === 6) {
+                <span class="chair-pill"></span>
+                <span class="chair-pill"></span>
+                <span class="chair-pill"></span>
+              } @else {
+                <span class="chair-pill"></span>
+                <span class="chair-pill"></span>
+                <span class="chair-pill"></span>
+                <span class="chair-pill"></span>
+              }
+            </div>
+
+            <div class="tabletop-surface">
+              <span class="tabletop-num">T{{ table.number < 10 ? '0' + table.number : table.number }}</span>
+            </div>
+
+            <div class="chairs-row chairs-bottom">
+              @if (table.capacity === 2) {
+                <span class="chair-pill"></span>
+              } @else if (table.capacity === 4) {
+                <span class="chair-pill"></span>
+                <span class="chair-pill"></span>
+              } @else if (table.capacity === 6) {
+                <span class="chair-pill"></span>
+                <span class="chair-pill"></span>
+                <span class="chair-pill"></span>
+              } @else {
+                <span class="chair-pill"></span>
+                <span class="chair-pill"></span>
+                <span class="chair-pill"></span>
+                <span class="chair-pill"></span>
+              }
+            </div>
+          </div>
+          <span class="capacity-text">{{ table.capacity }} Guests • {{ table.zone }}</span>
+        </div>
+
+        <!-- Table Status Details Body -->
+        <div class="table-card-body">
+          @if (table.status === 'OCCUPIED' || table.status === 'BILLING') {
+            <div class="occupied-info">
+              @if (table.occupiedSince) {
+                <span class="seated-time">⏱️ Seated: {{ table.occupiedSince }}</span>
+              }
+
+              @if (getTableOrder(table); as order) {
+                <div class="order-link-box">
+                  <div class="order-brief">
+                    <strong>{{ order.orderNumber }}</strong>
+                    <span class="order-guest">{{ order.customerName }}</span>
+                  </div>
+                  <div class="order-running-total inr-price">
+                    ₹{{ order.grandTotal }}
+                  </div>
+                </div>
+              }
+            </div>
+          } @else if (table.status === 'RESERVED' && table.reservation) {
+            <div class="reservation-info">
+              <span class="res-guest">👤 {{ table.reservation.customerName }}</span>
+              <span class="res-time">⏰ {{ table.reservation.timeSlot }} ({{ table.reservation.guests }} Guests)</span>
+              @if (table.reservation.notes) {
+                <span class="res-notes">📝 {{ table.reservation.notes }}</span>
+              }
+            </div>
+          } @else {
+            <div class="available-info">
+              <span class="ready-badge">✨ Ready for Seating</span>
+              <p>Cleaned and set with royal dinnerware.</p>
+            </div>
+          }
+        </div>
+
+        <!-- Table Action Buttons Footer -->
+        <div class="table-card-footer">
+          @if (table.status === 'AVAILABLE') {
+            <button class="btn btn-sm btn-gold btn-full" (click)="startOrderForTable(table)">
+              ➕ Seat Guests & Order
+            </button>
+            <button class="btn btn-sm btn-outline btn-full" (click)="openReserveModal(table)">
+              📅 Reserve Table
+            </button>
+          } @else if (table.status === 'OCCUPIED') {
+            <button class="btn btn-sm btn-primary" (click)="goToBilling(table)">
+              🧾 View / Bill
+            </button>
+            <button class="btn btn-sm btn-outline" (click)="setTableStatus(table, 'BILLING')">
+              Request Check
+            </button>
+          } @else if (table.status === 'BILLING') {
+            <button class="btn btn-sm btn-gold btn-full" (click)="goToBilling(table)">
+              💳 Settle Bill & Free
+            </button>
+          } @else if (table.status === 'RESERVED') {
+            <button class="btn btn-sm btn-primary btn-full" (click)="checkInReservedTable(table)">
+              🛎️ Check-in Guests
+            </button>
+            <button class="btn btn-sm btn-outline btn-full" (click)="freeTable(table)">
+              Cancel Reservation
+            </button>
+          }
+        </div>
+      </div>
+    }
+  </div>
+
+  <!-- Reservation Modal -->
+  @if (showReserveModal) {
+    <div class="modal-overlay" (click)="closeReserveModal()">
+      <div class="modal-dialog" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h2>📅 Reserve Restaurant Table</h2>
+          <button class="modal-close-btn" (click)="closeReserveModal()">✕</button>
+        </div>
+
+        <div class="modal-body">
+          <div class="form-group">
+            <label>Guest Name *</label>
+            <input
+              type="text"
+              class="form-control"
+              [(ngModel)]="reservationData.customerName"
+              placeholder="e.g. Mr. Rajesh Sharma"
+            >
+          </div>
+
+          <div class="form-row">
+            <div class="form-group col-6">
+              <label>Contact Phone Number *</label>
+              <input
+                type="tel"
+                class="form-control"
+                [(ngModel)]="reservationData.customerPhone"
+                placeholder="+91 98765 43210"
+              >
+            </div>
+            <div class="form-group col-6">
+              <label>Number of Guests</label>
+              <input
+                type="number"
+                class="form-control"
+                [(ngModel)]="reservationData.guests"
+                min="1"
+                max="12"
+              >
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Reservation Time Slot</label>
+            <select class="form-control" [(ngModel)]="reservationData.timeSlot">
+              <option value="07:00 PM">07:00 PM (Dinner Slot 1)</option>
+              <option value="07:30 PM">07:30 PM</option>
+              <option value="08:00 PM">08:00 PM (Peak Dinner)</option>
+              <option value="08:30 PM">08:30 PM</option>
+              <option value="09:00 PM">09:00 PM</option>
+              <option value="09:30 PM">09:30 PM (Late Dinner)</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Special Requests / Occasion</label>
+            <input
+              type="text"
+              class="form-control"
+              [(ngModel)]="reservationData.notes"
+              placeholder="e.g. Birthday Celebration, High chair needed"
+            >
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button class="btn btn-outline" (click)="closeReserveModal()">Cancel</button>
+          <button class="btn btn-gold" (click)="saveReservation()">Confirm Reservation</button>
+        </div>
+      </div>
+    </div>
+  }
+</div>

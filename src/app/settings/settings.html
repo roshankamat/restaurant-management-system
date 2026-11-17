@@ -1,0 +1,335 @@
+<div class="settings-container">
+  <div class="header-section">
+    <div>
+      <div class="eyebrow">प्रशासन और सुरक्षा • Administration & Security</div>
+      <h1 class="page-title">Admin Control Center, Staff Logins & Database</h1>
+      <p class="page-subtitle">Manage dedicated admin accounts, 4-digit POS PINs, Indian GST compliance, and local database backups</p>
+    </div>
+
+    <div class="settings-tabs">
+      <button class="tab-pill" [class.active]="activeTab === 'ACCESS'" (click)="activeTab = 'ACCESS'">
+        🛡️ Admin & Staff Access
+      </button>
+      <button class="tab-pill" [class.active]="activeTab === 'PROFILE'" (click)="activeTab = 'PROFILE'">
+        👑 Profile & GST
+      </button>
+      <button class="tab-pill" [class.active]="activeTab === 'DATABASE'" (click)="activeTab = 'DATABASE'">
+        🗄️ Database Sync
+      </button>
+    </div>
+  </div>
+
+  @if (feedbackMessage) {
+    <div class="alert" [ngClass]="'alert-' + feedbackType">
+      {{ feedbackType === 'success' ? '✅' : '⚠️' }} {{ feedbackMessage }}
+    </div>
+  }
+
+  <!-- TAB 1: ADMIN & STAFF ACCESS MANAGEMENT -->
+  @if (activeTab === 'ACCESS') {
+    <div class="grid-layout">
+      <!-- Left: Registered Admin Accounts + Add New -->
+      <div class="left-col-stack">
+        <div class="card-base">
+          <div class="card-header">
+            <h2>👥 Authorized Admin & Staff Accounts</h2>
+            <span class="badge-tag">{{ auth.adminUsers().length }} Active Users</span>
+          </div>
+
+          <div class="card-body">
+            <div class="staff-list">
+              @for (user of auth.adminUsers(); track user.id) {
+                <div class="staff-row" [class.is-me]="auth.currentUser()?.id === user.id">
+                  <div class="staff-avatar">{{ user.avatarInitials }}</div>
+                  <div class="staff-info">
+                    <div class="staff-name-line">
+                      <strong>{{ user.fullName }}</strong>
+                      @if (auth.currentUser()?.id === user.id) {
+                        <span class="you-badge">Active Session</span>
+                      }
+                    </div>
+                    <div class="staff-meta">
+                      <span>@{{ user.username }}</span> • <span>{{ user.title }}</span> • <span>PIN: <code>{{ user.pin }}</code></span>
+                    </div>
+                  </div>
+                  <span class="role-chip">{{ auth.formatRoleLabel(user.role) }}</span>
+                  @if (user.id !== 'adm-1' && auth.currentUser()?.id !== user.id) {
+                    <button
+                      type="button"
+                      class="btn btn-sm btn-outline text-danger"
+                      (click)="removeStaffAccount(user.id, user.fullName)"
+                      title="Revoke Access"
+                    >
+                      🗑️
+                    </button>
+                  }
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+
+        <!-- Add New Admin/Staff Login -->
+        <div class="card-base">
+          <div class="card-header">
+            <h2>➕ Create New Admin / Staff Login</h2>
+            <span class="badge-status">Instant Activation</span>
+          </div>
+
+          <div class="card-body">
+            <div class="form-row">
+              <div class="form-group col-6">
+                <label>Full Name *</label>
+                <input type="text" class="form-control" [(ngModel)]="newStaff.fullName" placeholder="e.g. Kabir Verma">
+              </div>
+              <div class="form-group col-6">
+                <label>Role *</label>
+                <select class="form-control" [(ngModel)]="newStaff.role">
+                  <option value="SUPER_ADMIN">👑 Super Admin (Full Control)</option>
+                  <option value="MANAGER">🎩 Floor Manager</option>
+                  <option value="HEAD_CHEF">👨‍🍳 Master Chef (KDS)</option>
+                  <option value="CASHIER">🧾 POS Cashier (Billing)</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group col-6">
+                <label>Login Username *</label>
+                <input type="text" class="form-control" [(ngModel)]="newStaff.username" placeholder="e.g. kabir">
+              </div>
+              <div class="form-group col-6">
+                <label>Email</label>
+                <input type="email" class="form-control" [(ngModel)]="newStaff.email" placeholder="kabir@kamatkadhaba.in">
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group col-6">
+                <label>Password *</label>
+                <input type="password" class="form-control" [(ngModel)]="newStaff.password" placeholder="Create strong password">
+              </div>
+              <div class="form-group col-6">
+                <label>4-Digit Quick PIN *</label>
+                <input type="text" maxlength="4" class="form-control" [(ngModel)]="newStaff.pin" placeholder="e.g. 4455">
+              </div>
+            </div>
+
+            <div class="card-actions">
+              <button type="button" class="btn btn-gold" (click)="createStaffAccount()">
+                ➕ Add Authorized Staff Login
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: My Security Credentials + Live Audit Trail -->
+      <div class="right-col-stack">
+        <div class="card-base">
+          <div class="card-header">
+            <h2>🔐 Update My Admin Credentials</h2>
+            <span class="badge-tag">{{ auth.currentUser()?.username }}</span>
+          </div>
+
+          <div class="card-body">
+            <p class="db-desc">
+              Change the password or 4-digit quick POS PIN for your currently signed-in account (<strong>{{ auth.currentUser()?.fullName }}</strong>).
+            </p>
+
+            <div class="form-group">
+              <label>New Password</label>
+              <input type="password" class="form-control" [(ngModel)]="mySecurity.newPassword" placeholder="Leave blank to keep current">
+            </div>
+
+            <div class="form-group">
+              <label>New 4-Digit PIN</label>
+              <input type="text" maxlength="4" class="form-control" [(ngModel)]="mySecurity.newPin" placeholder="Leave blank to keep current">
+            </div>
+
+            <div class="card-actions">
+              <button type="button" class="btn btn-primary" (click)="updateMySecurity()">
+                🔒 Update Security Credentials
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Audit Log -->
+        <div class="card-base">
+          <div class="card-header">
+            <h2>📜 Security & Activity Audit Log</h2>
+            <span class="badge-status">Live Trail</span>
+          </div>
+
+          <div class="card-body">
+            <div class="audit-list">
+              @for (log of auth.auditLogs(); track log.id) {
+                <div class="audit-entry">
+                  <div class="audit-title">{{ log.action }}</div>
+                  <div class="audit-sub">
+                    <strong>{{ log.actor }}</strong> ({{ auth.formatRoleLabel(log.role) }}) • {{ log.timestamp | date:'dd MMM, hh:mm:ss a' }}
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- TAB 2: RESTAURANT PROFILE & GST -->
+  @if (activeTab === 'PROFILE') {
+    <div class="card-base config-card single-wide">
+      <div class="card-header">
+        <h2>👑 Restaurant Profile & Brand Identity</h2>
+        <span class="badge-tag">GST & FSSAI Compliant</span>
+      </div>
+
+      <div class="card-body">
+        <div class="form-row">
+          <div class="form-group col-6">
+            <label>Restaurant Name (English)</label>
+            <input type="text" class="form-control" [(ngModel)]="profileData.name" placeholder="e.g. Kamat Ka Dhaba">
+          </div>
+          <div class="form-group col-6">
+            <label>Restaurant Name (Hindi / Devnagari)</label>
+            <input type="text" class="form-control" [(ngModel)]="profileData.hindiName" placeholder="e.g. कामत का ढाबा">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Brand Tagline</label>
+          <input type="text" class="form-control" [(ngModel)]="profileData.tagline" placeholder="Royal Indian Fine Dining">
+        </div>
+
+        <div class="form-group">
+          <label>Full Address</label>
+          <input type="text" class="form-control" [(ngModel)]="profileData.address" placeholder="Premises, Street, Area">
+        </div>
+
+        <div class="form-row">
+          <div class="form-group col-6">
+            <label>City</label>
+            <input type="text" class="form-control" [(ngModel)]="profileData.city" placeholder="New Delhi">
+          </div>
+          <div class="form-group col-6">
+            <label>Pincode</label>
+            <input type="text" class="form-control" [(ngModel)]="profileData.pincode" placeholder="110001">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group col-6">
+            <label>Official Phone Number</label>
+            <input type="text" class="form-control" [(ngModel)]="profileData.phone" placeholder="+91 98112 34567">
+          </div>
+          <div class="form-group col-6">
+            <label>Billing Email</label>
+            <input type="email" class="form-control" [(ngModel)]="profileData.email" placeholder="billing@kamatkadhaba.in">
+          </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="card-header-inner">
+          <h3>🇮🇳 Indian Tax & Licensing (GST & FSSAI)</h3>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group col-6">
+            <label>GSTIN (15 Digits)</label>
+            <input type="text" class="form-control" [(ngModel)]="profileData.gstin" placeholder="07AAAAA1234A1Z5">
+          </div>
+          <div class="form-group col-6">
+            <label>FSSAI Food License No. (14 Digits)</label>
+            <input type="text" class="form-control" [(ngModel)]="profileData.fssaiNumber" placeholder="10022011000984">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group col-6">
+            <label>CGST Rate (%)</label>
+            <input type="number" step="0.1" class="form-control" [(ngModel)]="profileData.cgstPercent">
+            <small class="helper-text">Standard restaurant CGST is 2.5%</small>
+          </div>
+          <div class="form-group col-6">
+            <label>SGST Rate (%)</label>
+            <input type="number" step="0.1" class="form-control" [(ngModel)]="profileData.sgstPercent">
+            <small class="helper-text">Standard restaurant SGST is 2.5%</small>
+          </div>
+        </div>
+
+        <div class="card-actions">
+          <button class="btn btn-gold" (click)="saveProfile()">
+            💾 Save Profile & Tax Rates
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- TAB 3: DATABASE BACKUP & SEED -->
+  @if (activeTab === 'DATABASE') {
+    <div class="card-base db-card single-wide">
+      <div class="card-header">
+        <h2>🗄️ Database Management & Persistence Engine</h2>
+        <span class="badge-status">Active Local Storage</span>
+      </div>
+
+      <div class="card-body">
+        <p class="db-desc">
+          Your restaurant management system persists all Indian menu items, dining tables, live orders, GST invoices, VIP customer records, and admin accounts safely in local browser storage.
+        </p>
+
+        <div class="db-stats-grid">
+          <div class="db-stat-box">
+            <span class="stat-number">{{ db.menu().length }}</span>
+            <span class="stat-label">Dishes in Menu</span>
+          </div>
+          <div class="db-stat-box">
+            <span class="stat-number">{{ db.tables().length }}</span>
+            <span class="stat-label">Dining Tables</span>
+          </div>
+          <div class="db-stat-box">
+            <span class="stat-number">{{ db.orders().length }}</span>
+            <span class="stat-label">Total Orders</span>
+          </div>
+          <div class="db-stat-box">
+            <span class="stat-number">{{ db.customers().length }}</span>
+            <span class="stat-label">VIP Customers</span>
+          </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <h3>📦 Backup & Restore Database</h3>
+        <p class="sub-text">Export full database backup to a JSON file or restore from a previous backup anytime.</p>
+
+        <div class="db-actions">
+          <button class="btn btn-gold" (click)="exportData()">
+            ⬇️ Export Database (JSON)
+          </button>
+
+          <label class="btn btn-outline file-upload-btn">
+            ⬆️ Import Database (JSON)
+            <input type="file" accept=".json" (change)="importData($event)" style="display: none;">
+          </label>
+        </div>
+
+        <div class="divider danger-divider"></div>
+
+        <div class="danger-zone">
+          <div class="danger-info">
+            <h4>🔄 Re-Seed / Reset to Default Indian Menu</h4>
+            <p>Restore the authentic curated Royal Indian menu with 27 items, 12 tables, and sample orders.</p>
+          </div>
+          <button class="btn btn-danger" (click)="resetDefaults()">
+            Reset to Default Seed
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+</div>

@@ -1,18 +1,108 @@
-<nav class="navbar">
+<nav class="navbar-wrapper no-print">
+  <div class="navbar-top">
+    <!-- Brand Identity -->
+    <a routerLink="/" class="brand-link">
+      <div class="brand-crest">👑</div>
+      <div class="brand-texts">
+        <span class="brand-hindi">{{ db.profile().hindiName }}</span>
+        <span class="brand-title">{{ db.profile().name }}</span>
+      </div>
+      <span class="brand-badge">Royal Admin OS</span>
+    </a>
 
-  <div class="logo">
-    🍽️ <span>Royal Restaurant</span>
+    <!-- Right Status, Theme Toggle, & Admin Profile Capsule -->
+    <div class="top-right-group">
+      <div class="top-status-bar">
+        <div class="status-pill table-pill">
+          <span class="pill-dot"></span>
+          <span>Tables: <strong>{{ db.occupiedTablesCount() }}/{{ db.tables().length }}</strong></span>
+        </div>
+
+        <div class="status-pill kitchen-pill">
+          <span class="pill-dot pulse"></span>
+          <span>Kitchen: <strong>{{ db.activeOrders().length }}</strong></span>
+        </div>
+
+        <div class="clock-badge">
+          <span class="clock-date">{{ currentDate }}</span>
+          <span class="clock-time">{{ currentTime }}</span>
+        </div>
+      </div>
+
+      <!-- Theme Switcher -->
+      <button
+        type="button"
+        class="theme-toggle-btn"
+        (click)="toggleTheme()"
+        [title]="auth.theme() === 'light' ? 'Switch to Darbar Velvet Night Mode' : 'Switch to Warm Sandalwood Ivory Mode'"
+      >
+        <span>{{ auth.theme() === 'light' ? '🌙' : '☀️' }}</span>
+      </button>
+
+      <!-- Logged-In Admin Profile Capsule -->
+      @if (auth.currentUser(); as user) {
+        <div class="admin-capsule">
+          <div class="admin-avatar">{{ user.avatarInitials }}</div>
+          <div class="admin-meta">
+            <span class="admin-name">{{ user.fullName }}</span>
+            <span class="admin-role">{{ auth.formatRoleLabel(user.role) }}</span>
+          </div>
+          <button
+            type="button"
+            class="logout-btn"
+            (click)="logout()"
+            title="Lock & Sign Out of Admin Panel"
+          >
+            <span>⏻</span>
+            <span class="logout-text">Logout</span>
+          </button>
+        </div>
+      }
+    </div>
   </div>
 
-  <div class="nav-links">
+  <!-- Navigation Pill Bar -->
+  <div class="navbar-menu">
+    <div class="nav-links">
+      <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" class="nav-item">
+        <span class="icon">📊</span>
+        <span>Dashboard</span>
+      </a>
 
-    <a routerLink="/">Dashboard</a>
-    <a routerLink="/menu">Menu</a>
-    <a routerLink="/tables">Tables</a>
-    <a routerLink="/orders">Orders</a>
-    <a routerLink="/billing">Billing</a>
-    <a routerLink="/customers">Customers</a>
+      <a routerLink="/menu" routerLinkActive="active" class="nav-item">
+        <span class="icon">🍛</span>
+        <span>Menu</span>
+        <span class="counter-badge">{{ db.menu().length }}</span>
+      </a>
 
+      <a routerLink="/tables" routerLinkActive="active" class="nav-item">
+        <span class="icon">🪑</span>
+        <span>Tables & Floor</span>
+        <span class="counter-badge" [class.highlight]="db.occupiedTablesCount() > 0">{{ db.occupiedTablesCount() }} Busy</span>
+      </a>
+
+      <a routerLink="/orders" routerLinkActive="active" class="nav-item">
+        <span class="icon">📋</span>
+        <span>Orders & KDS</span>
+        @if (db.activeOrders().length > 0) {
+          <span class="counter-badge pulse-badge">{{ db.activeOrders().length }}</span>
+        }
+      </a>
+
+      <a routerLink="/billing" routerLinkActive="active" class="nav-item">
+        <span class="icon">🧾</span>
+        <span>Billing & POS</span>
+      </a>
+
+      <a routerLink="/customers" routerLinkActive="active" class="nav-item">
+        <span class="icon">👥</span>
+        <span>VIP Guests</span>
+      </a>
+
+      <a routerLink="/settings" routerLinkActive="active" class="nav-item settings-link">
+        <span class="icon">🛡️</span>
+        <span>Admin, Staff & DB</span>
+      </a>
+    </div>
   </div>
-
 </nav>
